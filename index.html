@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LearnVault 學習庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-dark:#3C3489;--purple-light:#EEEDFE;
+  --border:#e5e5e5;--bg:#fff;--bg2:#f7f7f8;
+  --text:#1a1a1a;--text2:#555;--text3:#aaa;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);background:var(--bg2);height:100vh;overflow:hidden}
+#app{display:flex;height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:220px;flex-shrink:0;border-right:1px solid var(--border);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-logo{padding:15px 14px 12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)}
+.sidebar-logo i{color:var(--purple);font-size:18px}
+.sec-label{padding:10px 14px 3px;font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.cat-item{display:flex;align-items:center;gap:7px;padding:6px 10px;cursor:pointer;font-size:12px;border-radius:6px;margin:1px 5px;color:var(--text2);transition:background .1s;user-select:none}
+.cat-item:hover{background:var(--bg2)}
+.cat-item.active{background:var(--purple-light);color:var(--purple);font-weight:500}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(0,0,0,.08)}
+.cat-count{margin-left:auto;font-size:10px;color:var(--text3)}
+.cat-actions{display:flex;gap:2px;margin-left:4px}
+
+/* 新增分類區 */
+.add-cat-area{padding:6px 8px}
+.add-cat-row{display:flex;gap:4px;align-items:center}
+.add-cat-input{flex:1;padding:5px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text);font-family:inherit}
+.add-cat-input::placeholder{color:var(--text3)}
+.add-cat-input:focus{outline:none;border-color:var(--purple);background:#fff}
+.add-cat-btn{padding:5px 9px;background:var(--purple);color:#fff;border:none;border-radius:5px;font-size:13px;cursor:pointer;font-weight:500}
+.add-cat-btn:hover{background:var(--purple-dark)}
+
+/* 顏色選擇器 */
+.color-picker-row{display:flex;gap:5px;flex-wrap:wrap;padding:5px 0 2px}
+.color-swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s;flex-shrink:0}
+.color-swatch:hover{transform:scale(1.2)}
+.color-swatch.selected{border-color:var(--text);transform:scale(1.15)}
+
+.progress-box{padding:10px 14px 12px;border-top:1px solid var(--border)}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px}
+.progress-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--purple);border-radius:2px;transition:width .4s}
+
+.backup-area{padding:8px 8px 10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+.backup-btn{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;background:#fff;color:var(--text2);transition:all .1s;width:100%}
+.backup-btn:hover{background:var(--bg2)}
+.backup-btn.imp{color:var(--purple);border-color:#AFA9EC;background:var(--purple-light)}
+.backup-btn.imp:hover{background:#e0deff}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{padding:11px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;flex:1}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-input{padding:6px 10px 6px 30px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:inherit;color:var(--text);background:var(--bg2);width:180px;transition:width .2s,border-color .15s}
+.search-input:focus{outline:none;border-color:var(--purple);background:#fff;width:220px}
+.search-input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:8px;color:var(--text3);font-size:14px;pointer-events:none}
+.sort-select{padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;font-family:inherit;color:var(--text2);background:var(--bg2);cursor:pointer}
+.sort-select:focus{outline:none;border-color:var(--purple)}
+.btn-primary{display:flex;align-items:center;gap:5px;padding:7px 13px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:inherit}
+.btn-primary:hover{background:var(--purple-dark)}
+
+.content{flex:1;overflow-y:auto;padding:14px 18px}
+
+.bookmarklet-tip{background:#fff8e6;border:1px solid #f0d080;border-radius:var(--radius);padding:9px 13px;margin-bottom:13px;font-size:12px;color:#7a5c00;display:flex;align-items:center;gap:8px}
+.bookmarklet-tip i{flex-shrink:0;font-size:15px;color:#c49000}
+.bk-link{display:inline-block;background:var(--purple);color:#fff;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:500;text-decoration:none;cursor:grab;margin:0 3px}
+.tip-close{margin-left:auto;cursor:pointer;color:#c49000;background:none;border:none;font-size:16px;flex-shrink:0;padding:0}
+
+.review-strip{background:var(--purple-light);border-radius:var(--radius);padding:8px 13px;margin-bottom:13px;display:flex;align-items:center;gap:8px;font-size:12px}
+.review-strip i{color:var(--purple)}
+.review-strip strong{color:var(--purple-dark)}
+.review-link{margin-left:auto;font-size:11px;color:var(--purple);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+
+/* ── Cards ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:box-shadow .15s,border-color .15s;position:relative}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08);border-color:#ccc}
+.card-thumb{height:76px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;overflow:hidden}
+.card-thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:0;}
+.card-thumb-img.loaded{opacity:1;}
+.card-thumb-img{opacity:0;transition:opacity .25s;}
+.card-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.45) 100%);}
+.card-thumb-favicon{position:absolute;bottom:5px;left:7px;width:16px;height:16px;border-radius:3px;background:#fff;padding:1px;object-fit:contain;}
+.card-thumb-emoji{position:relative;z-index:1;font-size:26px;}
+.card-source{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.45);color:#fff;font-size:9px;border-radius:4px;padding:2px 6px;display:flex;align-items:center;gap:3px}
+.card-body{padding:10px 12px}
+.card-title{font-size:12px;font-weight:500;line-height:1.4;margin-bottom:5px}
+.card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+.tag{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500}
+.card-summary{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-footer{display:flex;align-items:center;gap:5px;padding-top:6px;border-top:1px solid var(--border);flex-wrap:wrap}
+.card-date{font-size:10px;color:var(--text3);flex:1}
+.review-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:#faeeda;color:#633806;font-weight:500}
+.review-badge.due{background:#fcebeb;color:#791f1f}
+.icon-btn{padding:4px;border:none;background:transparent;cursor:pointer;color:var(--text3);border-radius:4px;display:flex;align-items:center;font-size:13px;line-height:1}
+.icon-btn:hover{background:var(--bg2);color:var(--text)}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3);font-size:13px}
+.empty-state i{font-size:32px;display:block;margin-bottom:10px}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--border);width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal-header{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:sticky;top:0;background:#fff;z-index:1}
+.modal-header h3{font-size:13px;font-weight:500;line-height:1.4}
+.modal-body{padding:16px}
+.form-label{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:4px;display:block}
+.form-group{margin-bottom:12px}
+.inp{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:inherit;color:var(--text);background:#fafafa;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--purple);background:#fff}
+.inp::placeholder{color:var(--text3)}
+textarea.inp{resize:vertical;min-height:60px;line-height:1.55}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.points-list{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.point-row{display:flex;gap:5px;align-items:center}
+.point-row .inp{flex:1}
+.btn-add-point{display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px dashed var(--border);background:transparent;border-radius:var(--radius);font-size:11px;color:var(--text2);cursor:pointer;width:100%;justify-content:center;font-family:inherit}
+.btn-add-point:hover{background:var(--bg2)}
+.modal-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;bottom:0;background:#fff}
+.modal-footer-right{display:flex;gap:8px}
+.btn-ghost{padding:7px 13px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:transparent;cursor:pointer;color:var(--text2);font-family:inherit}
+.btn-ghost:hover{background:var(--bg2)}
+.btn-danger{padding:7px 13px;border:1px solid #fcc;border-radius:var(--radius);font-size:12px;background:transparent;cursor:pointer;color:#c00;font-family:inherit}
+.btn-danger:hover{background:#fff0f0}
+.src-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.src-tab{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;cursor:pointer;color:var(--text2);background:transparent;display:flex;align-items:center;gap:4px;font-family:inherit}
+.src-tab.active{background:var(--purple-light);color:var(--purple);border-color:#AFA9EC;font-weight:500}
+.notes-section{background:var(--bg2);border-radius:var(--radius);padding:11px;margin-bottom:11px}
+.notes-label{font-size:10px;color:var(--purple);font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:4px}
+.points-view{list-style:none;display:flex;flex-direction:column;gap:5px}
+.points-view li{font-size:12px;color:var(--text2);display:flex;gap:6px;line-height:1.5}
+.points-view li::before{content:"·";color:var(--purple);font-weight:700;flex-shrink:0}
+
+/* 複習 / SRS */
+.review-reset-row{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 11px;margin-bottom:12px;font-size:12px}
+.review-reset-row i{color:var(--purple)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* Color edit modal */
+.cat-edit-modal{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--border);width:260px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.cat-edit-modal h4{font-size:13px;font-weight:500;margin-bottom:12px}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
+
+/* ══════════════════════════════
+   新增功能樣式
+   ══════════════════════════════ */
+
+/* 統計頁 */
+.stats-grid-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;text-align:center}
+.stat-card.warn{border-color:#f0c0c0;background:#fff6f6}
+.stat-num{font-size:22px;font-weight:600;color:var(--purple)}
+.stat-card.warn .stat-num{color:#c00}
+.stat-label{font-size:11px;color:var(--text2);margin-top:3px}
+.stats-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
+.stats-section-title{font-size:12px;font-weight:600;margin-bottom:12px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:130px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.bar-track{width:100%;max-width:28px;height:90px;background:var(--bg2);border-radius:4px;display:flex;align-items:flex-end;overflow:hidden;margin:0 auto}
+.bar-fill{width:100%;background:var(--purple);border-radius:4px 4px 0 0;transition:height .3s;min-height:2px}
+.bar-val{font-size:10px;color:var(--text2);margin-top:4px;height:12px}
+.bar-label{font-size:10px;color:var(--text3);margin-top:2px}
+.cat-bars{display:flex;flex-direction:column;gap:8px}
+.cat-bar-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.cat-bar-name{display:flex;align-items:center;gap:5px;width:96px;flex-shrink:0;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-bar-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.cat-bar-count{width:24px;text-align:right;color:var(--text2);flex-shrink:0}
+
+/* 老化提醒 */
+.stale-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:#fde2e2;color:#a30000;font-weight:500;white-space:nowrap}
+.cat-item.stale-nav{color:#c00}
+.cat-item.stale-nav.active{background:#fde2e2;color:#a30000}
+
+/* 拖曳排序分類 */
+.cat-item[draggable="true"]{cursor:grab}
+.cat-item.dragging{opacity:.4}
+/* nav rename */
+.nav-rename-inp{font-size:12px;font-weight:500;background:transparent;border:none;border-bottom:1px solid var(--purple);outline:none;width:80px;color:var(--text);padding:0 2px;font-family:inherit;}
+.nav-edit-btn{margin-left:auto;opacity:0;font-size:10px;padding:1px 5px;background:transparent;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text2);font-family:inherit;}
+.cat-item:hover .nav-edit-btn{opacity:1;}
+/* todo tag manager */
+.todo-tag-manager{margin-top:8px;padding:8px 10px;background:#f7f5ff;border-radius:8px;border:1px solid var(--border);}
+.todo-tag-manager-title{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
+.todo-tag-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.todo-tag-swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.todo-tag-name{font-size:12px;flex:1;}
+.todo-tag-del{font-size:10px;background:transparent;border:none;cursor:pointer;color:var(--text3);padding:0 3px;}
+.todo-tag-del:hover{color:#e04a49;}
+.todo-tag-add-row{display:flex;gap:4px;margin-top:6px;}
+.todo-tag-add-row input{flex:1;font-size:11px;padding:4px 7px;}
+.todo-tag-add-row input[type=color]{width:30px;padding:1px 2px;border-radius:4px;cursor:pointer;}
+.todo-tag-add-row button{font-size:11px;padding:4px 8px;}
+.cat-item.drag-over{box-shadow:inset 0 0 0 1.5px var(--purple);background:var(--purple-light)}
+
+/* 卡片 / 列表模式切換 */
+.icon-btn.active-toggle,.btn-ghost.active-toggle{background:var(--purple-light);color:var(--purple)}
+.grid.list-mode{display:flex;flex-direction:column;gap:6px}
+.list-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.list-item:hover{box-shadow:0 2px 10px rgba(0,0,0,.06);border-color:#ccc}
+.list-item.selected{border-color:var(--purple);box-shadow:0 0 0 2px var(--purple-light)}
+.list-thumb{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.list-title{font-size:12px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-meta{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.list-checkbox{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;color:transparent}
+.list-checkbox.checked{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* 批次操作 */
+.card-checkbox{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:4px;background:#fff;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;z-index:2;color:transparent}
+.card-checkbox.checked{background:var(--purple);border-color:var(--purple);color:#fff}
+.card.selected{border-color:var(--purple);box-shadow:0 0 0 2px var(--purple-light)}
+.batch-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:50}
+.batch-bar select{padding:5px 8px;border-radius:6px;border:1px solid #444;background:#2a2a2a;color:#fff;font-size:11px;font-family:inherit}
+
+/* 測驗模式 */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)}
+.quiz-progress{font-size:11px;color:var(--text3);font-weight:500}
+.quiz-card-body{padding:32px 26px 28px;text-align:center}
+.quiz-question{font-size:17px;font-weight:600;line-height:1.5;margin:8px 0 4px}
+.quiz-hint{font-size:12px;color:var(--text3);margin-top:8px}
+.quiz-answer{text-align:left;background:var(--bg2);border-radius:var(--radius);padding:14px;margin-top:18px}
+.quiz-summary{font-size:12px;color:var(--text2);line-height:1.6;margin-top:8px}
+.quiz-actions{display:flex;gap:10px;margin-top:20px}
+
+/* ══════════════════════════════
+   待辦事項 + 月曆
+   ══════════════════════════════ */
+.todo-layout{display:grid;grid-template-columns:330px 1fr;gap:14px;align-items:start}
+@media (max-width:780px){.todo-layout{grid-template-columns:1fr}}
+.cal-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-head strong{font-size:13px;font-weight:600}
+.cal-nav-btn{padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;color:var(--text2);font-size:12px}
+.cal-nav-btn:hover{background:var(--bg2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{font-size:10px;color:var(--text3);text-align:center;padding:3px 0;font-weight:500}
+.cal-cell{position:relative;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;font-size:11px;color:var(--text);background:transparent;border:1px solid transparent}
+.cal-cell:hover{background:var(--bg2)}
+.cal-cell.muted{color:var(--text3)}
+.cal-cell.today{border-color:var(--purple)}
+.cal-cell.selected{background:var(--purple);color:#fff}
+.cal-cell.selected .cal-dot{background:#fff}
+.cal-dots{display:flex;gap:2px;position:absolute;bottom:3px}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--purple)}
+.todo-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;min-height:300px}
+.todo-box-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.todo-box-head h3{font-size:13px;font-weight:600}
+.todo-box-head span{font-size:11px;color:var(--text3)}
+.todo-add-row{display:flex;gap:6px;margin-bottom:12px}
+.todo-add-row .inp{flex:1}
+.todo-list{display:flex;flex-direction:column;gap:6px}
+.todo-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg2)}
+.todo-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#fff;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent}
+.todo-check.done{background:var(--purple);border-color:var(--purple);color:#fff}
+.todo-text{flex:1;font-size:12px;line-height:1.4;word-break:break-word}
+.todo-text.done{color:var(--text3);text-decoration:line-through}
+.todo-empty{text-align:center;color:var(--text3);font-size:12px;padding:30px 10px}
+.todo-progress{font-size:11px;color:var(--text2);margin-bottom:10px}
+.proto-warn{background:#fcebeb;border:1px solid #f0b0b0;border-radius:var(--radius);padding:9px 13px;margin-bottom:13px;font-size:12px;color:#791f1f;display:flex;align-items:center;gap:8px}
+.proto-warn i{flex-shrink:0;font-size:15px}
+
+/* 待辦：編號 / 標籤 / 今明摘要 */
+.todo-num{width:18px;text-align:center;font-size:11px;color:var(--text3);flex-shrink:0;font-weight:500}
+.todo-tag-badge{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0;white-space:nowrap}
+.todo-tag-select{padding:7px 9px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:inherit;color:var(--text);background:#fafafa;flex-shrink:0}
+.todo-tag-select:focus{outline:none;border-color:var(--purple)}
+.todo-filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.todo-filter-chip{padding:3px 10px;border-radius:12px;font-size:10px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:#fff;user-select:none}
+.todo-filter-chip.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.agenda-box{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.agenda-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:5px;cursor:pointer}
+.agenda-title:hover{color:var(--purple)}
+.agenda-list{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.agenda-item{display:flex;align-items:center;gap:7px;font-size:11px;padding:5px 7px;border-radius:6px;background:var(--bg2)}
+.agenda-item .todo-text{font-size:11px}
+.agenda-empty{font-size:11px;color:var(--text3);padding:2px 7px 6px}
+/* ── Notes page ── */
+.notes-layout{display:grid;grid-template-columns:240px 1fr;gap:0;height:calc(100vh - 54px);overflow:hidden;}
+.notes-sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--bg2);}
+.notes-sidebar-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notes-sidebar-head h4{font-size:12px;font-weight:600;color:var(--text2);}
+.notes-list{flex:1;overflow-y:auto;padding:6px;}
+.note-list-item{padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;}
+.note-list-item:hover{background:#fff;border-color:var(--border);}
+.note-list-item.active{background:#fff;border-color:var(--purple);box-shadow:0 0 0 1px var(--purple)22;}
+.note-list-title{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-list-preview{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.note-list-meta{font-size:9px;color:var(--text3);margin-top:2px;display:flex;gap:6px;}
+.note-list-item .note-del-btn{display:none;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:0 2px;margin-left:auto;}
+.note-list-item:hover .note-del-btn{display:block;}
+
+.notes-editor-wrap{display:flex;flex-direction:column;overflow:hidden;}
+.notes-editor-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:10px;}
+.notes-editor-empty i{font-size:36px;}
+.notes-editor-empty p{font-size:13px;}
+
+.note-editor-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.note-title-inp{font-size:16px;font-weight:600;border:none;outline:none;flex:1;background:transparent;color:var(--text);font-family:inherit;}
+.note-title-inp::placeholder{color:var(--text3);}
+.note-meta-bar{font-size:10px;color:var(--text3);padding:4px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;}
+.note-tag-chip{display:inline-flex;align-items:center;gap:3px;background:var(--purple-light);color:var(--purple);border-radius:99px;padding:1px 8px;font-size:10px;cursor:pointer;}
+.note-tag-chip .rm{opacity:.6;cursor:pointer;}
+.note-tag-chip .rm:hover{opacity:1;}
+.note-add-tag-btn{font-size:10px;color:var(--text3);background:none;border:1px dashed var(--border);border-radius:99px;padding:1px 8px;cursor:pointer;font-family:inherit;}
+.note-add-tag-btn:hover{border-color:var(--purple);color:var(--purple);}
+
+/* toolbar */
+.editor-toolbar{display:flex;align-items:center;gap:1px;padding:5px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0;background:#fafafa;}
+.tb-btn{background:none;border:none;border-radius:5px;padding:4px 6px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;min-width:28px;}
+.tb-btn:hover{background:var(--purple-light);color:var(--purple);}
+.tb-btn.active{background:var(--purple-light);color:var(--purple);}
+.tb-sep{width:1px;height:18px;background:var(--border);margin:0 3px;flex-shrink:0;}
+.tb-select{font-size:11px;border:1px solid var(--border);border-radius:5px;padding:3px 6px;background:#fff;color:var(--text);font-family:inherit;cursor:pointer;}
+.tb-select:focus{outline:none;border-color:var(--purple);}
+
+/* editor content */
+.note-content-area{flex:1;overflow-y:auto;padding:16px 20px;}
+.note-editor{outline:none;min-height:400px;font-size:13px;line-height:1.8;color:var(--text);}
+.note-editor h1{font-size:22px;font-weight:700;margin:12px 0 6px;color:var(--text);}
+.note-editor h2{font-size:17px;font-weight:600;margin:10px 0 4px;color:var(--text);}
+.note-editor h3{font-size:14px;font-weight:600;margin:8px 0 3px;color:var(--text);}
+.note-editor p{margin:2px 0;}
+.note-editor ul,.note-editor ol{padding-left:20px;margin:4px 0;}
+.note-editor li{margin:2px 0;}
+.note-editor blockquote{border-left:3px solid var(--purple);margin:6px 0;padding:4px 12px;background:var(--purple-light);border-radius:0 6px 6px 0;color:var(--text2);}
+.note-editor pre{background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:12px 14px;font-family:monospace;font-size:12px;overflow-x:auto;margin:6px 0;white-space:pre-wrap;}
+.note-editor code{background:#f0eeff;color:var(--purple);border-radius:4px;padding:1px 5px;font-family:monospace;font-size:12px;}
+.note-editor pre code{background:transparent;color:inherit;padding:0;}
+.note-editor a{color:var(--purple);text-decoration:underline;}
+.note-editor hr{border:none;border-top:2px solid var(--border);margin:12px 0;}
+.note-editor img{max-width:100%;border-radius:8px;margin:6px 0;}
+.note-editor mark{background:#fff3b0;border-radius:3px;padding:0 2px;}
+
+/* card citation block */
+.note-card-cite{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:6px 0;background:#fafafa;cursor:pointer;}
+.note-card-cite:hover{border-color:var(--purple);}
+.note-card-cite-thumb{width:36px;height:36px;border-radius:6px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden;}
+.note-card-cite-thumb img{width:100%;height:100%;object-fit:cover;}
+.note-card-cite-body{flex:1;min-width:0;}
+.note-card-cite-title{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-card-cite-url{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-card-cite-label{font-size:9px;color:var(--purple);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+
+/* note tag filter strip */
+.note-tag-filter{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+.note-tag-filter-chip{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border);cursor:pointer;background:#fff;color:var(--text2);white-space:nowrap;}
+.note-tag-filter-chip:hover{border-color:var(--purple);color:var(--purple);}
+.note-tag-filter-chip.active{color:#fff;border-color:transparent;}
+.note-tag-filter-chip.manage{background:transparent;border:1px dashed var(--border);color:var(--text3);}
+.note-tag-filter-chip.manage:hover{border-color:var(--purple);color:var(--purple);}
+/* tag manager modal panel */
+.ntm-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+.ntm-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.ntm-label{flex:1;font-size:13px;}
+.ntm-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;}
+.ntm-del:hover{color:#e04a49;}
+.card-note-section{border-top:1px solid var(--border);padding-top:12px;margin-top:8px;}
+.card-note-section h4{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><i class="ti ti-brain"></i>LearnVault</div>
+    <div id="nav-fixed-list"></div>
+    <div class="cat-item stale-nav" id="nav-stale" style="display:none" onclick="selectStale()">
+      <i class="ti ti-alert-triangle" style="font-size:13px"></i>已老化內容
+      <span class="cat-count" id="cnt-stale" style="color:inherit">0</span>
+    </div>
+    <div class="sec-label" style="margin-top:10px;">書籤分類</div>
+    <div id="cat-list" style="overflow-y:auto;flex:1"></div>
+    <div class="add-cat-area">
+      <div class="add-cat-row">
+        <input class="add-cat-input" id="new-cat-input" placeholder="新分類名稱..." maxlength="12"/>
+        <button class="add-cat-btn" onclick="addCat()">+</button>
+      </div>
+      <div class="color-picker-row" id="new-cat-colors"></div>
+    </div>
+    <div style="margin-top:auto">
+      <div class="progress-box">
+        <div class="progress-label"><span>已學習</span><span id="prog-text">0 / 0</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <div class="backup-area">
+        <button class="backup-btn" onclick="exportData()"><i class="ti ti-download" style="font-size:13px"></i>匯出備份</button>
+        <label class="backup-btn imp" style="justify-content:center;cursor:pointer">
+          <i class="ti ti-upload" style="font-size:13px"></i>匯入備份
+          <input type="file" accept=".json" onchange="importData(event)" style="display:none"/>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="page-title">全部內容</span>
+      <div class="search-wrap" id="search-wrap">
+        <i class="ti ti-search search-icon"></i>
+        <input class="search-input" id="search-input" placeholder="搜尋..." oninput="renderGrid()"/>
+      </div>
+      <select class="sort-select" id="sort-select" onchange="renderGrid()">
+        <option value="newest">最新新增</option>
+        <option value="oldest">最舊優先</option>
+        <option value="due">快到複習期</option>
+        <option value="alpha">標題 A-Z</option>
+      </select>
+      <div class="view-toggle-wrap" id="view-toggle-wrap" style="display:flex;gap:2px">
+        <button class="icon-btn" id="btn-view-grid" onclick="setCardView('grid')" title="卡片模式"><i class="ti ti-layout-grid"></i></button>
+        <button class="icon-btn" id="btn-view-list" onclick="setCardView('list')" title="列表模式"><i class="ti ti-list"></i></button>
+      </div>
+      <button class="btn-ghost" id="select-mode-btn" onclick="toggleSelectMode()" title="批次選取"><i class="ti ti-checkbox" style="font-size:13px"></i></button>
+      <button class="btn-ghost" id="quiz-btn" onclick="startQuiz(getVisibleList())" title="測驗目前列表"><i class="ti ti-cards" style="font-size:13px"></i></button>
+      <button class="btn-primary" onclick="openAddModal()"><i class="ti ti-plus" style="font-size:13px"></i>新增內容</button>
+    </div>
+    <div class="content">
+      <div class="proto-warn" id="proto-warn" style="display:none">
+        <i class="ti ti-alert-triangle"></i>
+        <span>目前以本機檔案（file://）開啟此頁面，瀏覽器會基於安全限制擋掉書籤小工具跳轉，導致「存到LearnVault」按鈕沒反應。請把這個 HTML 檔案放到網路空間（例如 GitHub Pages、Netlify，或公司的內部網頁伺服器）再用該網址重新拖曳書籤即可正常運作。</span>
+      </div>
+      <div class="bookmarklet-tip" id="bk-tip">
+        <i class="ti ti-bookmark"></i>
+        <span>把 <a class="bk-link" id="bk-btn" href="#">📌 存到LearnVault</a> 拖到書籤列，任何頁面一鍵存入！</span>
+        <button class="tip-close" onclick="dismissBkTip()">×</button>
+      </div>
+      <div class="review-strip" id="review-strip" style="display:none">
+        <i class="ti ti-bell"></i>
+        <span>有 <strong id="due-count">0</strong> 個內容到了複習時間</span>
+        <span class="review-link" onclick="filterDue()">查看列表</span>
+        <button class="btn-primary" style="padding:4px 10px;font-size:11px" onclick="startQuiz(state.cards.filter(isDue))"><i class="ti ti-cards" style="font-size:11px;vertical-align:-1px"></i> 開始測驗</button>
+      </div>
+      <div class="grid" id="card-grid"></div>
+      <div id="stats-page" style="display:none"></div>
+      <div id="todo-page" style="display:none"></div>
+      <div id="notes-page" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-inner"></div>
+</div>
+
+<!-- Quiz overlay -->
+<div class="modal-overlay" id="quiz-overlay" style="display:none" onclick="if(event.target===this)closeQuiz()">
+  <div class="modal" id="quiz-inner" style="width:420px"></div>
+</div>
+
+<!-- 批次操作浮動列 -->
+<div class="batch-bar" id="batch-bar" style="display:none"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════
+//  常數
+// ══════════════════════════════
+const PALETTE = [
+  '#1D9E75','#378ADD','#D4537E','#D85A30',
+  '#7F77DD','#BA7517','#E24B4A','#639922',
+  '#20A8C3','#9B59B6','#E67E22','#2ECC71'
+];
+
+const TYPE_META = {
+  yt:      {icon:'ti-brand-youtube',   label:'YouTube',   emoji:'📺'},
+  ig:      {icon:'ti-brand-instagram', label:'Instagram', emoji:'📱'},
+  article: {icon:'ti-article',         label:'文章',      emoji:'📄'},
+  web:     {icon:'ti-world',           label:'網頁',      emoji:'🌐'},
+};
+
+const SRS_INTERVALS = [1,3,7,14,30,60]; // 間隔重複天數序列（類似 Leitner box）
+const STALE_DAYS = 60; // 超過多少天未開啟視為「老化內容」
+
+// ══════════════════════════════
+//  狀態
+// ══════════════════════════════
+let state = {
+  cards:[], cats:[], activeCat:null,
+  showDue:false, showStale:false,
+  view:'grid',        // 'grid' | 'stats'
+  cardView:'grid',    // 'grid' | 'list'
+  selectMode:false, selected:new Set()
+};
+// cats 格式: [{name, color}]
+let newCatColor = PALETTE[0];
+
+// ══════════════════════════════
+//  工具
+// ══════════════════════════════
+const uid = () => Math.random().toString(36).slice(2,9);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const catObj = name => state.cats.find(c=>c.name===name) || {name, color:PALETTE[0]};
+const catColor = name => catObj(name).color;
+const daysSince = ts => ts ? Math.floor((Date.now()-ts)/86400000) : 999;
+
+// SRS：是否到了複習時間
+const isDue = c => {
+  if(c.nextReview!=null) return Date.now()>=c.nextReview;
+  if(c.reviewDays===0) return false;
+  return daysSince(c.addedAt) >= (c.reviewDays||7);
+};
+
+// 內容老化：太久沒開啟
+const isStale = c => daysSince(c.lastOpenedAt||c.addedAt) >= STALE_DAYS;
+
+function reviewLabel(c){
+  if(c.nextReview!=null){
+    const days=Math.ceil((c.nextReview-Date.now())/86400000);
+    return days>0 ? `${days}天後複習` : '待複習';
+  }
+  if(c.reviewDays===0) return '不提醒';
+  const left=c.reviewDays-daysSince(c.addedAt);
+  return left>0 ? `${left}天後複習` : '待複習';
+}
+
+function timeUntilDue(c){
+  if(c.nextReview!=null) return c.nextReview-Date.now();
+  if(c.reviewDays===0) return Infinity;
+  return (c.reviewDays-daysSince(c.addedAt))*86400000;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ══════════════════════════════
+//  儲存
+// ══════════════════════════════
+function save() { localStorage.setItem('learnvault', JSON.stringify({cards:state.cards, cats:state.cats, cardView:state.cardView})); }
+
+function loadFromStorage() {
+  try {
+    const d = JSON.parse(localStorage.getItem('learnvault')||'{}');
+    state.cards = d.cards || [];
+    // 相容舊版（cats 可能是字串陣列）
+    state.cats = (d.cats||[]).map(c =>
+      typeof c === 'string' ? {name:c, color:PALETTE[state.cats?state.cats.length%PALETTE.length:0]} : c
+    );
+    state.cardView = d.cardView==='list' ? 'list' : 'grid';
+  } catch(e) {}
+}
+
+// ══════════════════════════════
+//  匯出 / 匯入
+// ══════════════════════════════
+function exportData() {
+  const blob = new Blob([JSON.stringify({cards:state.cards, cats:state.cats},null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `learnvault-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('✅ 已匯出備份！');
+}
+
+function importData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = evt => {
+    try {
+      const d = JSON.parse(evt.target.result);
+      if(!d.cards) throw new Error();
+      if(!confirm(`確定要匯入？這會覆蓋現有 ${state.cards.length} 筆資料。`)) return;
+      state.cards = d.cards||[];
+      state.cats = (d.cats||[]).map(c => typeof c==='string'?{name:c,color:PALETTE[0]}:c);
+      save(); render(); toast(`✅ 已匯入 ${state.cards.length} 筆！`);
+    } catch { alert('檔案格式錯誤'); }
+  };
+  r.readAsText(file); e.target.value='';
+}
+
+// ══════════════════════════════
+//  書籤腳本
+// ══════════════════════════════
+function setupBookmarklet() {
+  const base = location.href.replace(/[?#].*/,'');
+  const code = `javascript:(function(){var u=encodeURIComponent(location.href),t=encodeURIComponent(document.title);var f=document.querySelector('meta[property="og:title"]');if(f)t=encodeURIComponent(f.content);var target='${base}'+'?bk_url='+u+'&bk_title='+t;var w=window.open(target,'_blank','width=460,height=580');if(!w){location.href=target;}})();`;
+  document.getElementById('bk-btn').href = code;
+
+  // file:// 協定下，瀏覽器會擋掉跨頁面的書籤小工具，提早提醒使用者
+  const warn = document.getElementById('proto-warn');
+  if(warn) warn.style.display = (location.protocol==='file:') ? 'flex' : 'none';
+}
+
+function dismissBkTip(){
+  document.getElementById('bk-tip').style.display='none';
+  localStorage.setItem('learnvault_hide_bktip','1');
+}
+function updateBkTipVisibility(){
+  const tip=document.getElementById('bk-tip');
+  if(state.view==='stats' || state.view==='todo' || state.view==='notes'){ tip.style.display='none'; return; }
+  tip.style.display = localStorage.getItem('learnvault_hide_bktip')==='1' ? 'none' : 'flex';
+}
+
+// ══════════════════════════════
+//  顏色選擇器
+// ══════════════════════════════
+function renderColorPicker(containerId, selectedColor, onChange) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = PALETTE.map(c =>
+    `<span class="color-swatch${c===selectedColor?' selected':''}"
+      style="background:${c}" onclick="(${onChange.toString()})('${c}')" title="${c}"></span>`
+  ).join('');
+}
+
+function initNewCatColorPicker() {
+  renderColorPicker('new-cat-colors', newCatColor, (c)=>{
+    newCatColor=c;
+    document.querySelectorAll('#new-cat-colors .color-swatch').forEach(s=>{
+      s.classList.toggle('selected', s.style.background===c || s.style.backgroundColor===c);
+    });
+  });
+}
+
+// ══════════════════════════════
+//  Render
+// ══════════════════════════════
+function render() {
+  renderSidebar();
+  const notesEl = document.getElementById('notes-page');
+  if(state.view==='stats'){
+    document.getElementById('card-grid').style.display='none';
+    document.getElementById('stats-page').style.display='block';
+    document.getElementById('todo-page').style.display='none';
+    if(notesEl) notesEl.style.display='none';
+    toggleStatsTopbarControls(true);
+    renderStatsPage();
+    document.getElementById('page-title').textContent='統計';
+  } else if(state.view==='todo'){
+    document.getElementById('card-grid').style.display='none';
+    document.getElementById('stats-page').style.display='none';
+    document.getElementById('todo-page').style.display='block';
+    if(notesEl) notesEl.style.display='none';
+    toggleStatsTopbarControls(true);
+    renderTodoPage();
+    document.getElementById('page-title').textContent='待辦 / 月曆';
+  } else if(state.view==='notes'){
+    document.getElementById('card-grid').style.display='none';
+    document.getElementById('stats-page').style.display='none';
+    document.getElementById('todo-page').style.display='none';
+    if(notesEl) notesEl.style.display='block';
+    toggleStatsTopbarControls(true);
+    renderNotesPage();
+    document.getElementById('page-title').textContent='學習筆記';
+  } else {
+    document.getElementById('card-grid').style.display='';
+    document.getElementById('stats-page').style.display='none';
+    document.getElementById('todo-page').style.display='none';
+    if(notesEl) notesEl.style.display='none';
+    toggleStatsTopbarControls(false);
+    renderGrid();
+  }
+  renderProgress();
+  renderDueStrip();
+  renderViewToggle();
+  renderBatchBar();
+  updateBkTipVisibility();
+}
+
+function toggleStatsTopbarControls(isStats){
+  ['search-wrap','sort-select','view-toggle-wrap','select-mode-btn','quiz-btn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display = isStats ? 'none' : '';
+  });
+}
+
+function renderViewToggle(){
+  const g=document.getElementById('btn-view-grid'), l=document.getElementById('btn-view-list'), s=document.getElementById('select-mode-btn');
+  if(g) g.classList.toggle('active-toggle', state.cardView==='grid');
+  if(l) l.classList.toggle('active-toggle', state.cardView==='list');
+  if(s) s.classList.toggle('active-toggle', state.selectMode);
+}
+
+function updateCounts(){ renderSidebar(); }
+
+function renderSidebar() {
+  // re-render fixed nav (handles active states + count badge)
+  renderFixedNav();
+  const cntAll = document.getElementById('cnt-all');
+  if(cntAll) cntAll.textContent = state.cards.length;
+
+  const staleCount = state.cards.filter(isStale).length;
+  const staleEl = document.getElementById('nav-stale');
+  staleEl.style.display = staleCount>0 ? 'flex' : 'none';
+  staleEl.classList.toggle('active', state.showStale);
+  document.getElementById('cnt-stale').textContent = staleCount;
+
+  document.getElementById('cat-list').innerHTML = state.cats.map((c, idx) => {
+    const cnt = state.cards.filter(x=>x.cat===c.name).length;
+    const active = state.activeCat===c.name && !state.showDue && !state.showStale && state.view==='grid';
+    return `<div class="cat-item${active?' active':''}" data-cat="${esc(c.name)}"
+      draggable="true" ondragstart="catDragStart(event,${idx})" ondragover="catDragOver(event)"
+      ondragleave="catDragLeave(event)" ondrop="catDrop(event,${idx})" ondragend="catDragEnd(event)"
+      onclick="selectCat(this)" style="justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:6px;min-width:0;flex:1">
+        <i class="ti ti-grip-vertical" style="font-size:11px;color:var(--text3);flex-shrink:0"></i>
+        <span class="cat-dot" style="background:${c.color}"></span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:2px;flex-shrink:0">
+        <span class="cat-count">${cnt}</span>
+        <button class="icon-btn" onclick="event.stopPropagation();openEditCat('${esc(c.name)}')" title="編輯顏色"><i class="ti ti-palette" style="font-size:11px"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();deleteCat('${esc(c.name)}')"><i class="ti ti-x" style="font-size:10px"></i></button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function getSortedFiltered(list) {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  if(q) list = list.filter(c =>
+    c.title.toLowerCase().includes(q) ||
+    (c.summary||'').toLowerCase().includes(q) ||
+    (c.tags||[]).some(t=>t.toLowerCase().includes(q)) ||
+    (c.cat||'').toLowerCase().includes(q) ||
+    (c.points||[]).some(p=>p.toLowerCase().includes(q))
+  );
+  const sort = document.getElementById('sort-select').value;
+  if(sort==='newest') list.sort((a,b)=>b.addedAt-a.addedAt);
+  else if(sort==='oldest') list.sort((a,b)=>a.addedAt-b.addedAt);
+  else if(sort==='due') list.sort((a,b)=>timeUntilDue(a)-timeUntilDue(b));
+  else if(sort==='alpha') list.sort((a,b)=>a.title.localeCompare(b.title,'zh-TW'));
+  return list;
+}
+
+function getVisibleList(){
+  let list = state.activeCat ? state.cards.filter(c=>c.cat===state.activeCat) : [...state.cards];
+  if(state.showDue) list = state.cards.filter(isDue);
+  if(state.showStale) list = state.cards.filter(isStale);
+  return getSortedFiltered(list);
+}
+
+function emptyStateHTML(){
+  const q = document.getElementById('search-input').value;
+  let msg = '還沒有內容，點右上角新增吧！';
+  if(q) msg = '找不到符合的內容';
+  else if(state.showDue) msg = '目前沒有待複習的內容';
+  else if(state.showStale) msg = '目前沒有老化內容，做得很好！';
+  return `<div class="empty-state"><i class="ti ti-inbox"></i>${msg}</div>`;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('card-grid');
+  grid.classList.toggle('list-mode', state.cardView==='list');
+  const list = getVisibleList();
+  document.getElementById('page-title').textContent = state.showStale?'已老化內容':state.showDue?'待複習':(state.activeCat||'全部內容');
+
+  if(!list.length){ grid.innerHTML = emptyStateHTML(); return; }
+  grid.innerHTML = list.map(c => state.cardView==='list' ? listItemHTML(c) : cardItemHTML(c)).join('');
+}
+
+function cardItemHTML(c){
+  const m = TYPE_META[c.type]||TYPE_META.article;
+  const cc = catColor(c.cat);
+  const due = isDue(c);
+  const stale = isStale(c);
+  const checked = state.selected.has(c.id);
+  const clickAction = state.selectMode ? `toggleSelect('${c.id}')` : `openViewModal('${c.id}')`;
+
+  // resolve thumb: manual > microlink auto > favicon > emoji bg
+  const rawUrl = c.url||'';
+  let faviconUrl = '';
+  let autoThumb = '';
+  try{
+    const domain = rawUrl ? new URL(rawUrl).hostname : '';
+    if(domain){
+      faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+      autoThumb  = `https://api.microlink.io/screenshot?url=${encodeURIComponent(rawUrl)}&viewport.width=800&viewport.height=418&waitFor=1000&type=jpeg&quality=75&embed=screenshot.url`;
+    }
+  }catch(e){}
+  const thumbSrc = c.thumbUrl || (rawUrl ? autoThumb : '');
+
+  const thumbHtml = thumbSrc
+    ? `<img class="card-thumb-img" src="${esc(thumbSrc)}"
+          onload="this.classList.add('loaded')"
+          onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='');" />
+       <div class="card-thumb-overlay"></div>
+       ${faviconUrl?`<img class="card-thumb-favicon" src="${esc(faviconUrl)}" onerror="this.style.display='none'" />`:''}
+       <div class="card-source" style="top:6px;left:${faviconUrl?'30':'6'}px"><i class="ti ${m.icon}" style="font-size:9px"></i>${m.label}</div>`
+    : `<span class="card-thumb-emoji">${m.emoji}</span>
+       <div class="card-source"><i class="ti ${m.icon}" style="font-size:9px"></i>${m.label}</div>
+       ${faviconUrl?`<img class="card-thumb-favicon" src="${esc(faviconUrl)}" onerror="this.style.display='none'" />`:''}`;
+
+  return `<div class="card${checked?' selected':''}" onclick="${clickAction}">
+      ${state.selectMode?`<div class="card-checkbox${checked?' checked':''}" onclick="event.stopPropagation();toggleSelect('${c.id}')"><i class="ti ti-check" style="font-size:11px"></i></div>`:''}
+      <div class="card-thumb" style="background:${cc}18">
+        ${thumbHtml}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(c.title||'（未命名）')}</div>
+        <div class="card-tags">${(c.tags||[]).map(t=>`<span class="tag" style="background:${cc}20;color:${cc}">${esc(t)}</span>`).join('')}</div>
+        <div class="card-summary">${esc(c.summary||'')}</div>
+        <div class="card-footer">
+          <span class="card-date">${esc(c.date||'')}</span>
+          ${stale?'<span class="stale-badge" title="超過60天未開啟">⚠ 已老化</span>':''}
+          <span class="review-badge${due?' due':''}">${due?'待複習':reviewLabel(c)}</span>
+          <button class="icon-btn" onclick="event.stopPropagation();openEditModal('${c.id}')" title="編輯"><i class="ti ti-pencil"></i></button>
+          <button class="icon-btn" onclick="event.stopPropagation();deleteCard('${c.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function listItemHTML(c){
+  const m = TYPE_META[c.type]||TYPE_META.article;
+  const cc = catColor(c.cat);
+  const due = isDue(c);
+  const stale = isStale(c);
+  const checked = state.selected.has(c.id);
+  const clickAction = state.selectMode ? `toggleSelect('${c.id}')` : `openViewModal('${c.id}')`;
+  return `<div class="list-item${checked?' selected':''}" onclick="${clickAction}">
+    ${state.selectMode?`<div class="list-checkbox${checked?' checked':''}" onclick="event.stopPropagation();toggleSelect('${c.id}')"><i class="ti ti-check" style="font-size:10px"></i></div>`:''}
+    <div class="list-thumb" style="background:${cc}18;position:relative;overflow:hidden;">
+      ${c.thumbUrl
+        ? `<img src="${esc(c.thumbUrl)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />`
+        : (c.url ? `<img src="https://www.google.com/s2/favicons?domain=${(()=>{try{return new URL(c.url).hostname}catch(e){return ''}})()}&sz=64" style="width:20px;height:20px;" onerror="this.outerHTML='${m.emoji}'" />` : m.emoji)
+      }
+    </div>
+    <div class="list-title">${esc(c.title||'（未命名）')}</div>
+    ${c.cat?`<span class="tag" style="background:${cc}20;color:${cc};flex-shrink:0">${esc(c.cat)}</span>`:''}
+    <div class="list-meta">
+      ${stale?'<span class="stale-badge">⚠ 已老化</span>':''}
+      <span class="review-badge${due?' due':''}">${due?'待複習':reviewLabel(c)}</span>
+      <span class="card-date" style="width:auto">${esc(c.date||'')}</span>
+      <button class="icon-btn" onclick="event.stopPropagation();openEditModal('${c.id}')"><i class="ti ti-pencil"></i></button>
+      <button class="icon-btn" onclick="event.stopPropagation();deleteCard('${c.id}')"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>`;
+}
+
+function renderProgress() {
+  const total=state.cards.length, reviewed=state.cards.filter(c=>!isDue(c)).length;
+  document.getElementById('prog-text').textContent=`${reviewed} / ${total}`;
+  document.getElementById('prog-fill').style.width=total?Math.round(reviewed/total*100)+'%':'0%';
+}
+function renderDueStrip() {
+  const cnt=state.cards.filter(isDue).length;
+  const show = cnt>0 && state.view!=='stats' && state.view!=='todo';
+  document.getElementById('review-strip').style.display=show?'flex':'none';
+  document.getElementById('due-count').textContent=cnt;
+}
+
+// ══════════════════════════════
+//  統計頁面
+// ══════════════════════════════
+function renderStatsPage(){
+  const el = document.getElementById('stats-page');
+  const total = state.cards.length;
+  if(!total){
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-chart-bar"></i>還沒有資料，新增內容後就能看到統計！</div>`;
+    return;
+  }
+  const now = Date.now();
+  const weekAdded = state.cards.filter(c=>now-c.addedAt<=7*86400000).length;
+  const weekReviewed = state.cards.filter(c=>c.lastReviewedAt && now-c.lastReviewedAt<=7*86400000).length;
+  const reviewedTotal = state.cards.filter(c=>!isDue(c)).length;
+  const completion = Math.round(reviewedTotal/total*100);
+  const staleCount = state.cards.filter(isStale).length;
+
+  const catStats = state.cats.map(ct=>({
+      name:ct.name, color:ct.color,
+      count: state.cards.filter(c=>c.cat===ct.name).length
+    }))
+    .concat([{name:'未分類', color:'#ccc', count: state.cards.filter(c=>!c.cat).length}])
+    .filter(s=>s.count>0)
+    .sort((a,b)=>b.count-a.count);
+  const maxCat = Math.max(1, ...catStats.map(s=>s.count));
+
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(now-i*86400000);
+    const dayStart=new Date(d); dayStart.setHours(0,0,0,0);
+    const dayEnd=dayStart.getTime()+86400000;
+    const cnt=state.cards.filter(c=>c.addedAt>=dayStart.getTime() && c.addedAt<dayEnd).length;
+    days.push({label:`${d.getMonth()+1}/${d.getDate()}`, count:cnt});
+  }
+  const maxDay = Math.max(1, ...days.map(d=>d.count));
+
+  el.innerHTML = `
+    <div class="stats-grid-top">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">總內容數</div></div>
+      <div class="stat-card"><div class="stat-num">${weekAdded}</div><div class="stat-label">本週新增</div></div>
+      <div class="stat-card"><div class="stat-num">${weekReviewed}</div><div class="stat-label">本週複習</div></div>
+      <div class="stat-card"><div class="stat-num">${completion}%</div><div class="stat-label">複習完成率</div></div>
+      ${staleCount>0?`<div class="stat-card warn"><div class="stat-num">${staleCount}</div><div class="stat-label">已老化內容</div></div>`:''}
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">過去 7 天新增趨勢</div>
+      <div class="bar-chart">
+        ${days.map(d=>`<div class="bar-col">
+            <div class="bar-track"><div class="bar-fill" style="height:${d.count?(d.count/maxDay*100):2}%"></div></div>
+            <div class="bar-val">${d.count||''}</div>
+            <div class="bar-label">${d.label}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">分類內容分布</div>
+      <div class="cat-bars">
+        ${catStats.map(s=>`
+          <div class="cat-bar-row">
+            <span class="cat-bar-name"><span class="cat-dot" style="background:${s.color}"></span>${esc(s.name)}</span>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${s.count/maxCat*100}%;background:${s.color}"></div></div>
+            <span class="cat-bar-count">${s.count}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════
+//  待辦事項 + 月曆
+// ══════════════════════════════
+let todos = {};           // {"YYYY-MM-DD": [{id,text,done,tag}]}
+let calYear, calMonth;
+let selectedDate;
+let todoFilterTag='all';
+
+// ── Nav order & names (persistent) ───────────────
+const NAV_DEFAULTS = [
+  {key:'all',   label:'全部',       icon:'ti-layout-grid'},
+  {key:'todo',  label:'待辦 / 月曆', icon:'ti-calendar-event'},
+  {key:'notes', label:'學習筆記',   icon:'ti-notebook'},
+  {key:'stats', label:'統計',       icon:'ti-chart-bar'}
+];
+let navConfig = [];   // [{key, label}] in current order
+function loadNavConfig(){
+  try{ const s=localStorage.getItem('lv_nav_config'); if(s) navConfig=JSON.parse(s); }catch(e){}
+  // merge: ensure all default keys exist (handles adding new nav items after upgrade)
+  const existingKeys=navConfig.map(n=>n.key);
+  NAV_DEFAULTS.forEach(d=>{
+    if(!existingKeys.includes(d.key)){
+      // insert at same position as in NAV_DEFAULTS
+      const defaultIdx=NAV_DEFAULTS.findIndex(x=>x.key===d.key);
+      navConfig.splice(Math.min(defaultIdx, navConfig.length), 0, {key:d.key, label:d.label});
+    }
+  });
+  if(!navConfig.length) navConfig=NAV_DEFAULTS.map(n=>({key:n.key,label:n.label}));
+  saveNavConfig();
+}
+function saveNavConfig(){ localStorage.setItem('lv_nav_config', JSON.stringify(navConfig)); }
+
+function renderFixedNav(){
+  const el = document.getElementById('nav-fixed-list'); if(!el) return;
+  const NAV_META = Object.fromEntries(NAV_DEFAULTS.map(n=>[n.key,n]));
+  el.innerHTML = navConfig.map((n,i)=>{
+    const meta = NAV_META[n.key]||{icon:'ti-circle'};
+    const isActive = (n.key==='all' && state.view==='grid' && !state.activeCat && !state.showDue && !state.showStale)
+      || (n.key==='todo' && state.view==='todo')
+      || (n.key==='notes' && state.view==='notes')
+      || (n.key==='stats' && state.view==='stats');
+    const countBadge = n.key==='all' ? `<span class="cat-count" id="cnt-all">0</span>` : '';
+    return `<div class="cat-item${isActive?' active':''}" draggable="true"
+        id="nav-fixed-${n.key}"
+        data-nav-key="${n.key}" data-nav-idx="${i}"
+        ondragstart="navDragStart(event,${i})"
+        ondragover="event.preventDefault()"
+        ondrop="navDrop(event,${i})"
+        onclick="navClick('${n.key}')">
+      <i class="ti ${meta.icon}" style="font-size:13px"></i>
+      <span class="nav-label" id="nav-label-${n.key}">${esc(n.label)}</span>
+      ${countBadge}
+      <button class="nav-edit-btn" onclick="event.stopPropagation();startNavRename('${n.key}')" title="重新命名">✏️</button>
+    </div>`;
+  }).join('');
+}
+
+let _navDragIdx = null;
+function navDragStart(e, idx){ _navDragIdx=idx; e.dataTransfer.effectAllowed='move'; e.currentTarget.classList.add('dragging'); }
+function navDrop(e, targetIdx){
+  e.preventDefault();
+  document.querySelectorAll('#nav-fixed-list .cat-item').forEach(el=>el.classList.remove('dragging'));
+  if(_navDragIdx===null||_navDragIdx===targetIdx){_navDragIdx=null;return;}
+  const moved=navConfig.splice(_navDragIdx,1)[0];
+  navConfig.splice(targetIdx,0,moved);
+  _navDragIdx=null;
+  saveNavConfig(); renderFixedNav(); updateCounts();
+}
+
+function navClick(key){
+  if(key==='all') { state.view='grid'; state.showDue=false; state.showStale=false; state.activeCat=null; state.selected.clear(); render(); }
+  else if(key==='todo') selectTodo();
+  else if(key==='notes') selectNotes();
+  else if(key==='stats') selectStats();
+}
+
+function startNavRename(key){
+  const labelEl = document.getElementById('nav-label-'+key); if(!labelEl) return;
+  const cur = navConfig.find(n=>n.key===key);
+  const inp = document.createElement('input');
+  inp.className='nav-rename-inp';
+  inp.value = cur?.label||'';
+  inp.onclick = e=>e.stopPropagation();
+  const commit=()=>{
+    const val=inp.value.trim();
+    if(val && cur) cur.label=val;
+    saveNavConfig(); renderFixedNav(); updateCounts();
+  };
+  inp.onblur=commit;
+  inp.onkeydown=e=>{ if(e.key==='Enter')inp.blur(); if(e.key==='Escape'){inp.value=cur?.label||'';inp.blur();} };
+  labelEl.replaceWith(inp); inp.focus(); inp.select();
+}
+
+// ── Todo tags (persistent, customisable) ─────────
+const TODO_TAG_DEFAULTS = [
+  {key:'work',     label:'工作', color:'#378ADD'},
+  {key:'personal', label:'私人', color:'#D4537E'},
+  {key:'other',    label:'其他', color:'#7F77DD'}
+];
+let todoTags = [];    // [{key, label, color}]
+function loadTodoTags(){
+  try{ const s=localStorage.getItem('lv_todo_tags'); if(s) todoTags=JSON.parse(s); }catch(e){}
+  if(!todoTags.length) todoTags=TODO_TAG_DEFAULTS.map(t=>({...t}));
+}
+function saveTodoTags(){ localStorage.setItem('lv_todo_tags', JSON.stringify(todoTags)); }
+// helper: get TODO_TAGS-style object for legacy code
+function getTodoTagMap(){ const m={}; todoTags.forEach(t=>m[t.key]=t); return m; }
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmtDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+
+function loadTodos(){
+  try{ todos = JSON.parse(localStorage.getItem('learnvault_todos')||'{}'); }catch(e){ todos={}; }
+}
+function saveTodos(){ localStorage.setItem('learnvault_todos', JSON.stringify(todos)); }
+
+function initCalendarState(){
+  const now=new Date();
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  selectedDate=fmtDate(now);
+}
+
+function changeMonth(delta){
+  calMonth+=delta;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  renderTodoPage();
+}
+
+function selectDate(dateStr){
+  selectedDate=dateStr;
+  renderTodoPage();
+}
+
+function renderTodoPage(){
+  const el=document.getElementById('todo-page');
+  el.innerHTML = `
+    <div class="todo-layout">
+      <div class="cal-box">${calendarHTML()}</div>
+      <div class="todo-box">${todoBoxHTML()}</div>
+    </div>`;
+}
+
+function calendarHTML(){
+  const first=new Date(calYear, calMonth, 1);
+  const startOffset=first.getDay(); // 0=Sun
+  const daysInMonth=new Date(calYear, calMonth+1, 0).getDate();
+  const todayStr=fmtDate(new Date());
+  const dows=['日','一','二','三','四','五','六'];
+
+  let cells='';
+  for(let i=0;i<startOffset;i++) cells+=`<div class="cal-cell muted"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr=`${calYear}-${pad2(calMonth+1)}-${pad2(d)}`;
+    const hasTodo = (todos[dateStr]||[]).length>0;
+    const hasCard = state.cards.some(c=>c.date && c.addedAt && fmtDate(new Date(c.addedAt))===dateStr);
+    const cls=['cal-cell'];
+    if(dateStr===todayStr) cls.push('today');
+    if(dateStr===selectedDate) cls.push('selected');
+    cells+=`<div class="${cls.join(' ')}" onclick="selectDate('${dateStr}')">
+      <span>${d}</span>
+      ${(hasTodo||hasCard)?`<span class="cal-dots">${hasTodo?'<span class="cal-dot"></span>':''}${hasCard?'<span class="cal-dot" style="background:#D85A30"></span>':''}</span>`:''}
+    </div>`;
+  }
+  return `
+    <div class="cal-head">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+      <strong>${calYear} 年 ${calMonth+1} 月</strong>
+      <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="cal-grid">
+      ${dows.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:12px;font-size:10px;color:var(--text2)">
+      <span><span class="cal-dot" style="display:inline-block;margin-right:3px"></span>有待辦</span>
+      <span><span class="cal-dot" style="display:inline-block;margin-right:3px;background:#D85A30"></span>有新增內容</span>
+    </div>
+    <button class="btn-ghost" style="width:100%;margin-top:10px;justify-content:center;display:flex" onclick="selectDate('${todayStr}')">回到今天</button>
+    ${agendaHTML()}`;
+}
+
+function agendaHTML(){
+  const now=new Date();
+  const tomorrow=new Date(now); tomorrow.setDate(now.getDate()+1);
+  const todayStr=fmtDate(now), tomorrowStr=fmtDate(tomorrow);
+  const TMAP=getTodoTagMap();
+  const agendaRow=(dateStr,label)=>{
+    const list=todos[dateStr]||[];
+    if(!list.length) return `<div class="agenda-title" onclick="selectDate('${dateStr}')">${label}</div><div class="agenda-empty">沒有待辦事項</div>`;
+    return `<div class="agenda-title" onclick="selectDate('${dateStr}')">${label}<span style="color:var(--text3);font-weight:400">（${list.filter(t=>t.done).length}/${list.length}）</span></div>
+      <div class="agenda-list">
+        ${list.map(t=>{
+          const tag=TMAP[t.tag];
+          return `<div class="agenda-item">
+            <div class="todo-check${t.done?' done':''}" style="width:15px;height:15px" onclick="toggleTodoItem('${t.id}','${dateStr}')"><i class="ti ti-check" style="font-size:9px"></i></div>
+            <div class="todo-text${t.done?' done':''}">${esc(t.text)}</div>
+            ${tag?`<span class="todo-tag-badge" style="background:${tag.color}20;color:${tag.color}">${tag.label}</span>`:''}
+          </div>`;
+        }).join('')}
+      </div>`;
+  };
+  return `<div class="agenda-box">
+    ${agendaRow(todayStr,'📌 今天要做')}
+    ${agendaRow(tomorrowStr,'➡️ 明天要做')}
+  </div>`;
+}
+
+function todoBoxHTML(){
+  const TMAP=getTodoTagMap();
+  const all = todos[selectedDate]||[];
+  const list = todoFilterTag==='all' ? all : all.filter(t=>t.tag===todoFilterTag);
+  const done = all.filter(t=>t.done).length;
+  const dateObj=new Date(selectedDate+'T00:00:00');
+  const label = dateObj.toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
+  const tagOptions = todoTags.map(t=>`<option value="${t.key}">${t.label}</option>`).join('');
+  const filterChips = `<span class="todo-filter-chip${todoFilterTag==='all'?' active':''}" onclick="setTodoFilter('all')">全部</span>` +
+    todoTags.map(t=>`<span class="todo-filter-chip${todoFilterTag===t.key?' active':''}" onclick="setTodoFilter('${t.key}')" style="${todoFilterTag===t.key?`background:${t.color};border-color:${t.color}`:''}">${t.label}</span>`).join('');
+
+  // tag manager panel
+  const tagManager = `<div class="todo-tag-manager">
+    <div class="todo-tag-manager-title">自訂標籤</div>
+    ${todoTags.map(t=>`<div class="todo-tag-row">
+      <span class="todo-tag-swatch" style="background:${t.color}"></span>
+      <span class="todo-tag-name">${esc(t.label)}</span>
+      ${todoTags.length>1?`<button class="todo-tag-del" onclick="deleteTodoTag('${t.key}')" title="刪除">✕</button>`:''}
+    </div>`).join('')}
+    <div class="todo-tag-add-row">
+      <input type="text" id="new-tag-label" placeholder="新標籤名稱" maxlength="8"/>
+      <input type="color" id="new-tag-color" value="#7F77DD" title="選擇顏色"/>
+      <button class="btn-primary" onclick="addTodoTag()" style="font-size:11px;padding:4px 8px;">新增</button>
+    </div>
+  </div>`;
+
+  return `
+    <div class="todo-box-head">
+      <h3>${esc(label)} 的待辦事項</h3>
+      <span>${done} / ${all.length} 已完成</span>
+    </div>
+    <div class="todo-add-row">
+      <input class="inp" id="todo-add-input" placeholder="輸入今天要做的事，按 Enter 新增..." onkeydown="if(event.key==='Enter')addTodoItem()"/>
+      <select class="todo-tag-select" id="todo-tag-select">${tagOptions}</select>
+      <button type="button" class="btn-primary" onclick="addTodoItem()"><i class="ti ti-plus" style="font-size:13px"></i>新增</button>
+    </div>
+    <div class="todo-filter-row">${filterChips}</div>
+    <div class="todo-list">
+      ${list.length ? list.map((t,i)=>{
+        const tag=TMAP[t.tag];
+        return `<div class="todo-item">
+          <span class="todo-num">${i+1}</span>
+          <div class="todo-check${t.done?' done':''}" onclick="toggleTodoItem('${t.id}')"><i class="ti ti-check" style="font-size:11px"></i></div>
+          <div class="todo-text${t.done?' done':''}">${esc(t.text)}</div>
+          ${tag?`<span class="todo-tag-badge" style="background:${tag.color}20;color:${tag.color}">${tag.label}</span>`:''}
+          <button class="icon-btn" onclick="deleteTodoItem('${t.id}')"><i class="ti ti-trash"></i></button>
+        </div>`;
+      }).join('') : `<div class="todo-empty"><i class="ti ti-clipboard-list" style="font-size:24px;display:block;margin-bottom:6px"></i>${all.length?'這個標籤目前沒有待辦事項':'這天還沒有待辦事項'}</div>`}
+    </div>
+    ${tagManager}`;
+}
+
+function setTodoFilter(tag){ todoFilterTag=tag; renderTodoPage(); }
+
+function addTodoTag(){
+  const labelInp=document.getElementById('new-tag-label');
+  const colorInp=document.getElementById('new-tag-color');
+  const label=(labelInp?.value||'').trim();
+  if(!label){ labelInp?.focus(); return; }
+  const color=colorInp?.value||'#7F77DD';
+  const key='tag_'+Date.now().toString(36);
+  todoTags.push({key,label,color});
+  saveTodoTags(); renderTodoPage();
+}
+function deleteTodoTag(key){
+  if(todoTags.length<=1){ toast('至少保留一個標籤'); return; }
+  todoTags=todoTags.filter(t=>t.key!==key);
+  if(todoFilterTag===key) todoFilterTag='all';
+  saveTodoTags(); renderTodoPage();
+}
+
+function addTodoItem(){
+  const inp=document.getElementById('todo-add-input');
+  const tagSel=document.getElementById('todo-tag-select');
+  const text=inp.value.trim();
+  if(!text){ inp.focus(); toast('請先輸入待辦事項內容'); return; }
+  if(!todos[selectedDate]) todos[selectedDate]=[];
+  todos[selectedDate].push({id:uid(), text, done:false, tag: tagSel?tagSel.value:'work'});
+  inp.value='';
+  saveTodos(); renderTodoPage();
+  document.getElementById('todo-add-input')?.focus();
+}
+function toggleTodoItem(id, dateStr){
+  dateStr = dateStr || selectedDate;
+  const list=todos[dateStr]||[];
+  const t=list.find(x=>x.id===id);
+  if(t){ t.done=!t.done; saveTodos(); renderTodoPage(); }
+}
+function deleteTodoItem(id, dateStr){
+  dateStr = dateStr || selectedDate;
+  todos[dateStr]=(todos[dateStr]||[]).filter(x=>x.id!==id);
+  saveTodos(); renderTodoPage();
+}
+
+// ══════════════════════════════
+//  分類操作
+// ══════════════════════════════
+function selectCat(el){
+  state.view='grid'; state.showDue=false; state.showStale=false;
+  state.activeCat=el.dataset.cat||null;
+  state.selected.clear();
+  render();
+}
+function filterDue(){
+  state.view='grid'; state.showDue=true; state.showStale=false; state.activeCat=null;
+  state.selected.clear();
+  render();
+}
+function selectStale(){
+  state.view='grid'; state.showStale=true; state.showDue=false; state.activeCat=null;
+  state.selected.clear();
+  render();
+}
+function selectStats(){
+  state.view='stats'; state.showDue=false; state.showStale=false; state.activeCat=null;
+  state.selected.clear();
+  render();
+}
+function selectTodo(){
+  state.view='todo'; state.showDue=false; state.showStale=false; state.activeCat=null;
+  state.selected.clear();
+  render();
+}
+
+function addCat(){
+  const inp=document.getElementById('new-cat-input');
+  const name=inp.value.trim();
+  if(!name||state.cats.find(c=>c.name===name)) return;
+  state.cats.push({name, color:newCatColor});
+  inp.value='';
+  save(); render(); initNewCatColorPicker();
+}
+
+function deleteCat(name){
+  state.cats=state.cats.filter(c=>c.name!==name);
+  state.cards.forEach(c=>{if(c.cat===name)c.cat='';});
+  if(state.activeCat===name)state.activeCat=null;
+  save(); render();
+}
+
+function openEditCat(name){
+  const cat=catObj(name);
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="modal-header"><h3>編輯分類「${esc(name)}」</h3>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">分類名稱</label>
+        <input class="inp" id="edit-cat-name" value="${esc(name)}" maxlength="12"/></div>
+      <div class="form-group"><label class="form-label">選擇顏色</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px" id="edit-cat-colors"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><div></div><div class="modal-footer-right">
+      <button class="btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="saveEditCat('${esc(name)}')">儲存</button>
+    </div></div>`;
+  document.getElementById('modal').style.display='flex';
+  let editCatColor=cat.color;
+  const renderEditColors=()=>{
+    document.getElementById('edit-cat-colors').innerHTML=PALETTE.map(c=>
+      `<span class="color-swatch${c===editCatColor?' selected':''}" style="background:${c}"
+        onclick="document.querySelectorAll('#edit-cat-colors .color-swatch').forEach(s=>s.classList.remove('selected'));this.classList.add('selected');window._editCatColor='${c}'"></span>`
+    ).join('');
+  };
+  window._editCatColor=editCatColor;
+  renderEditColors();
+}
+
+function saveEditCat(oldName){
+  const newName=document.getElementById('edit-cat-name').value.trim();
+  const newColor=window._editCatColor||PALETTE[0];
+  if(!newName) return;
+  const idx=state.cats.findIndex(c=>c.name===oldName);
+  if(idx>-1){state.cats[idx]={name:newName,color:newColor};}
+  state.cards.forEach(c=>{if(c.cat===oldName)c.cat=newName;});
+  if(state.activeCat===oldName)state.activeCat=newName;
+  save(); render(); closeModal();
+  toast('✅ 分類已更新！');
+}
+
+document.getElementById('new-cat-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCat();});
+
+// ══════════════════════════════
+//  拖曳排序分類
+// ══════════════════════════════
+let dragCatIdx=null;
+function catDragStart(e, idx){
+  dragCatIdx=idx;
+  e.dataTransfer.effectAllowed='move';
+  e.currentTarget.classList.add('dragging');
+}
+function catDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function catDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function catDrop(e, idx){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(dragCatIdx===null || dragCatIdx===idx){ dragCatIdx=null; return; }
+  const item=state.cats.splice(dragCatIdx,1)[0];
+  state.cats.splice(idx,0,item);
+  dragCatIdx=null;
+  save(); renderSidebar();
+}
+function catDragEnd(){
+  document.querySelectorAll('.cat-item').forEach(el=>el.classList.remove('dragging','drag-over'));
+  dragCatIdx=null;
+}
+
+// ══════════════════════════════
+//  卡片 / 列表模式切換
+// ══════════════════════════════
+function setCardView(v){
+  state.cardView=v;
+  save();
+  renderGrid();
+  renderViewToggle();
+}
+
+// ══════════════════════════════
+//  批次操作
+// ══════════════════════════════
+function toggleSelectMode(){
+  state.selectMode=!state.selectMode;
+  if(!state.selectMode) state.selected.clear();
+  renderGrid(); renderViewToggle(); renderBatchBar();
+}
+function toggleSelect(id){
+  if(state.selected.has(id)) state.selected.delete(id); else state.selected.add(id);
+  renderGrid(); renderBatchBar();
+}
+function renderBatchBar(){
+  const bar=document.getElementById('batch-bar');
+  if(state.selectMode && state.selected.size>0){
+    bar.style.display='flex';
+    bar.innerHTML=`
+      <span>已選擇 ${state.selected.size} 項</span>
+      <select id="batch-cat-select">
+        <option value="">移到：不分類</option>
+        ${state.cats.map(c=>`<option value="${esc(c.name)}">移到：${esc(c.name)}</option>`).join('')}
+      </select>
+      <button class="btn-primary" style="padding:5px 10px;font-size:11px" onclick="batchMove()">移動</button>
+      <button class="btn-danger" style="padding:5px 10px;font-size:11px;background:#fff" onclick="batchDelete()">刪除</button>
+      <button class="btn-ghost" style="padding:5px 10px;font-size:11px;background:transparent;color:#fff;border-color:rgba(255,255,255,.35)" onclick="toggleSelectMode()">取消</button>`;
+  } else {
+    bar.style.display='none';
+  }
+}
+function batchMove(){
+  const cat=document.getElementById('batch-cat-select').value;
+  state.cards.forEach(c=>{ if(state.selected.has(c.id)) c.cat=cat; });
+  state.selected.clear();
+  save(); render();
+  toast('✅ 已移動分類！');
+}
+function batchDelete(){
+  const n=state.selected.size;
+  if(!confirm(`確定要刪除選取的 ${n} 項內容？`)) return;
+  state.cards=state.cards.filter(c=>!state.selected.has(c.id));
+  state.selected.clear();
+  save(); render();
+  toast(`✅ 已刪除 ${n} 項！`);
+}
+
+// ══════════════════════════════
+//  新增 Modal
+// ══════════════════════════════
+let editPoints=[''];
+let currentType='yt';
+
+function openAddModal(){
+  const params=new URLSearchParams(window.location.search);
+  const preUrl=params.get('bk_url')?decodeURIComponent(params.get('bk_url')):'';
+  const preTitle=params.get('bk_title')?decodeURIComponent(params.get('bk_title')):'';
+  editPoints=[''];
+  currentType=preUrl?(preUrl.includes('youtu')?'yt':preUrl.includes('instagram')?'ig':'web'):'yt';
+  document.getElementById('modal-inner').innerHTML=addModalHTML(preUrl,preTitle);
+  document.getElementById('modal').style.display='flex';
+  setType(currentType);
+  if(preUrl){history.replaceState({},'',location.pathname);}
+}
+
+function addModalHTML(preUrl='',preTitle=''){
+  return `
+  <div class="modal-header"><h3>新增學習內容</h3>
+    <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group">
+      <div class="form-label">來源類型</div>
+      <div class="src-tabs">
+        <button class="src-tab" id="tab-yt" onclick="setType('yt')"><i class="ti ti-brand-youtube"></i>YouTube</button>
+        <button class="src-tab" id="tab-ig" onclick="setType('ig')"><i class="ti ti-brand-instagram"></i>Instagram</button>
+        <button class="src-tab" id="tab-web" onclick="setType('web')"><i class="ti ti-world"></i>網頁</button>
+        <button class="src-tab" id="tab-article" onclick="setType('article')"><i class="ti ti-article"></i>文章</button>
+      </div>
+      <input class="inp" id="f-url" placeholder="貼上連結（選填），會自動偵測類型" value="${esc(preUrl)}" oninput="detectUrlType(this.value)"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        縮圖網址
+        <button type="button" onclick="autoFetchThumb()" style="font-size:10px;padding:2px 8px;background:var(--purple-light);color:var(--purple);border:1px solid #AFA9EC;border-radius:5px;cursor:pointer;font-family:inherit;">自動抓取</button>
+      </label>
+      <div id="thumb-preview-wrap" style="display:none;margin-bottom:6px;">
+        <img id="thumb-preview-img" src="" style="width:100%;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" />
+      </div>
+      <input class="inp" id="f-thumb" placeholder="留空則自動用連結預覽圖 / 可手動貼圖片網址" value=""/>
+    </div>
+    <div class="form-group"><label class="form-label">標題 *</label>
+      <input class="inp" id="f-title" placeholder="這個內容叫什麼？" value="${esc(preTitle)}"/></div>
+    <div class="form-group"><label class="form-label">摘要</label>
+      <textarea class="inp" id="f-summary" placeholder="用一兩句話說明內容..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">重點筆記</label>
+      <div class="points-list" id="points-list">${renderPointInputs()}</div>
+      <button class="btn-add-point" onclick="addPoint()"><i class="ti ti-plus" style="font-size:11px"></i>新增重點</button>
+    </div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">分類</label>
+        <select class="inp" id="f-cat">
+          <option value="">不分類</option>
+          ${state.cats.map(c=>`<option>${esc(c.name)}</option>`).join('')}
+        </select></div>
+      <div class="form-group"><label class="form-label">複習提醒</label>
+        <select class="inp" id="f-review">
+          <option value="7">7 天後</option>
+          <option value="14">14 天後</option>
+          <option value="30">30 天後</option>
+          <option value="0">不提醒</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">標籤（逗號分隔）</label>
+      <input class="inp" id="f-tags" placeholder="例：投資, ETF, 長期"/></div>
+  </div>
+  <div class="modal-footer"><div></div><div class="modal-footer-right">
+    <button class="btn-ghost" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveCard()">儲存</button>
+  </div></div>`;
+}
+
+function setType(t){
+  currentType=t;
+  ['yt','ig','web','article'].forEach(x=>{
+    const el=document.getElementById('tab-'+x);
+    if(el) el.classList.toggle('active',x===t);
+  });
+}
+
+// URL 自動偵測來源類型（新增內容時）
+function detectUrlType(url){
+  if(!url || !url.trim()) return;
+  const t = url.includes('youtu') ? 'yt' : url.includes('instagram') ? 'ig' : 'web';
+  setType(t);
+}
+
+// 自動抓取預覽圖
+async function autoFetchThumb(){
+  const url = document.getElementById('f-url')?.value.trim();
+  if(!url){ alert('請先填入連結'); return; }
+  const btn = event.target;
+  btn.textContent='抓取中…'; btn.disabled=true;
+  let imgUrl = '';
+  try{
+    // 1. 先試 Microlink（抓 OG image，不是截圖，速度快）
+    const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}&meta=true`);
+    const data = await res.json();
+    if(data.status==='success' && data.data?.image?.url){
+      imgUrl = data.data.image.url;
+    }
+  }catch(e){}
+
+  if(!imgUrl){
+    // 2. fallback：用 Google favicon 作為縮圖
+    try{
+      const domain = new URL(url).hostname;
+      imgUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    }catch(e){}
+  }
+
+  btn.textContent='自動抓取'; btn.disabled=false;
+
+  if(imgUrl){
+    const inp = document.getElementById('f-thumb');
+    const wp  = document.getElementById('thumb-preview-wrap');
+    const ip  = document.getElementById('thumb-preview-img');
+    if(inp) inp.value = imgUrl;
+    if(wp && ip){ ip.src=imgUrl; wp.style.display=''; }
+    toast('✅ 縮圖已抓取！');
+  } else {
+    toast('⚠ 無法抓取預覽圖，請手動貼圖片網址');
+  }
+}
+
+// f-thumb 手動輸入時即時預覽
+document.addEventListener('input', function(e){
+  if(e.target && e.target.id==='f-thumb'){
+    const val = e.target.value.trim();
+    const wp = document.getElementById('thumb-preview-wrap');
+    const ip = document.getElementById('thumb-preview-img');
+    if(!wp||!ip) return;
+    if(val){ ip.src=val; wp.style.display=''; }
+    else { wp.style.display='none'; }
+  }
+});
+
+function renderPointInputs(){
+  return editPoints.map((p,i)=>`
+    <div class="point-row">
+      <input class="inp" value="${esc(p)}" placeholder="重點 ${i+1}..." oninput="editPoints[${i}]=this.value"/>
+      <button class="icon-btn" onclick="removePoint(${i})"><i class="ti ti-x" style="font-size:11px"></i></button>
+    </div>`).join('');
+}
+
+function addPoint(){editPoints.push('');document.getElementById('points-list').innerHTML=renderPointInputs();}
+function removePoint(i){editPoints.splice(i,1);if(!editPoints.length)editPoints=[''];document.getElementById('points-list').innerHTML=renderPointInputs();}
+
+function saveCard(editId){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){document.getElementById('f-title').focus();return;}
+  const now=new Date();
+  const prev = editId ? state.cards.find(c=>c.id===editId) : null;
+  const reviewDays = parseInt(document.getElementById('f-review').value)||0;
+  const card={
+    id:editId||uid(), type:currentType,
+    url:document.getElementById('f-url').value.trim(),
+    thumbUrl:document.getElementById('f-thumb').value.trim(),
+    title,
+    summary:document.getElementById('f-summary').value.trim(),
+    points:editPoints.filter(p=>p.trim()),
+    cat:document.getElementById('f-cat').value,
+    reviewDays,
+    tags:document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    addedAt: prev ? (prev.addedAt||Date.now()) : Date.now(),
+    date: prev ? (prev.date||`${now.getMonth()+1}/${now.getDate()} 新增`) : `${now.getMonth()+1}/${now.getDate()} 新增`,
+    notes: prev ? (prev.notes||'') : '',
+    lastOpenedAt: prev ? prev.lastOpenedAt : undefined,
+    lastReviewedAt: prev ? prev.lastReviewedAt : undefined
+  };
+  // SRS 排程：設定不變則延續原有進度，否則依新設定重新排期
+  if(prev && prev.reviewDays===reviewDays && prev.nextReview!=null){
+    card.srsLevel=prev.srsLevel; card.nextReview=prev.nextReview;
+  } else if(reviewDays>0){
+    let idx=SRS_INTERVALS.findIndex(d=>d>=reviewDays); if(idx===-1) idx=SRS_INTERVALS.length-1;
+    card.srsLevel=idx;
+    card.nextReview=card.addedAt+reviewDays*86400000;
+  } else {
+    card.srsLevel=null; card.nextReview=null;
+  }
+  if(editId){
+    const idx=state.cards.findIndex(c=>c.id===editId);
+    if(idx>-1) state.cards[idx]=card; else state.cards.unshift(card);
+  } else {
+    state.cards.unshift(card);
+  }
+  save(); render(); closeModal();
+  toast(editId?'✅ 已更新！':'✅ 已儲存！');
+}
+
+// ══════════════════════════════
+//  編輯 Modal
+// ══════════════════════════════
+function openEditModal(id){
+  const c=state.cards.find(x=>x.id===id); if(!c) return;
+  editPoints=c.points&&c.points.length?[...c.points]:[''];
+  currentType=c.type||'yt';
+  document.getElementById('modal-inner').innerHTML=editModalHTML(c);
+  document.getElementById('modal').style.display='flex';
+  setType(currentType);
+  // 填入現有值
+  document.getElementById('f-url').value=c.url||'';
+  document.getElementById('f-thumb').value=c.thumbUrl||'';
+  if(c.thumbUrl){
+    const wp=document.getElementById('thumb-preview-wrap');
+    const ip=document.getElementById('thumb-preview-img');
+    if(wp&&ip){ip.src=c.thumbUrl;wp.style.display='';}
+  }
+  document.getElementById('f-title').value=c.title||'';
+  document.getElementById('f-summary').value=c.summary||'';
+  document.getElementById('f-cat').value=c.cat||'';
+  document.getElementById('f-review').value=String(c.reviewDays||7);
+  document.getElementById('f-tags').value=(c.tags||[]).join(', ');
+}
+
+function editModalHTML(c){
+  return `
+  <div class="modal-header"><h3>編輯內容</h3>
+    <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group">
+      <div class="form-label">來源類型</div>
+      <div class="src-tabs">
+        <button class="src-tab" id="tab-yt" onclick="setType('yt')"><i class="ti ti-brand-youtube"></i>YouTube</button>
+        <button class="src-tab" id="tab-ig" onclick="setType('ig')"><i class="ti ti-brand-instagram"></i>Instagram</button>
+        <button class="src-tab" id="tab-web" onclick="setType('web')"><i class="ti ti-world"></i>網頁</button>
+        <button class="src-tab" id="tab-article" onclick="setType('article')"><i class="ti ti-article"></i>文章</button>
+      </div>
+      <input class="inp" id="f-url" placeholder="貼上連結（選填）"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        縮圖網址
+        <button type="button" onclick="autoFetchThumb()" style="font-size:10px;padding:2px 8px;background:var(--purple-light);color:var(--purple);border:1px solid #AFA9EC;border-radius:5px;cursor:pointer;font-family:inherit;">自動抓取</button>
+      </label>
+      <div id="thumb-preview-wrap" style="display:none;margin-bottom:6px;">
+        <img id="thumb-preview-img" src="" style="width:100%;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" />
+      </div>
+      <input class="inp" id="f-thumb" placeholder="留空則自動用連結預覽圖 / 可手動貼圖片網址" value=""/>
+    </div>
+    <div class="form-group"><label class="form-label">標題 *</label>
+      <input class="inp" id="f-title" placeholder="標題"/></div>
+    <div class="form-group"><label class="form-label">摘要</label>
+      <textarea class="inp" id="f-summary" placeholder="摘要..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">重點筆記</label>
+      <div class="points-list" id="points-list">${renderPointInputs()}</div>
+      <button class="btn-add-point" onclick="addPoint()"><i class="ti ti-plus" style="font-size:11px"></i>新增重點</button>
+    </div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">分類</label>
+        <select class="inp" id="f-cat">
+          <option value="">不分類</option>
+          ${state.cats.map(ct=>`<option>${esc(ct.name)}</option>`).join('')}
+        </select></div>
+      <div class="form-group"><label class="form-label">複習提醒</label>
+        <select class="inp" id="f-review">
+          <option value="7">7 天後</option>
+          <option value="14">14 天後</option>
+          <option value="30">30 天後</option>
+          <option value="0">不提醒</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">標籤（逗號分隔）</label>
+      <input class="inp" id="f-tags"/></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-danger" onclick="deleteCard('${c.id}');closeModal()"><i class="ti ti-trash" style="font-size:12px;vertical-align:-1px"></i> 刪除</button>
+    <div class="modal-footer-right">
+      <button class="btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="saveCard('${c.id}')">儲存</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════
+//  檢視 Modal
+// ══════════════════════════════
+function openViewModal(id){
+  const c=state.cards.find(x=>x.id===id); if(!c) return;
+  c.lastOpenedAt=Date.now(); save(); // 開啟後不再視為老化內容
+  const m=TYPE_META[c.type]||TYPE_META.article;
+  const cc=catColor(c.cat);
+  const due=isDue(c);
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="modal-header">
+      <h3>${esc(c.title)}</h3>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px">
+        <span class="tag" style="background:${cc}20;color:${cc}"><i class="ti ${m.icon}" style="font-size:9px;vertical-align:-1px"></i> ${m.label}</span>
+        ${c.cat?`<span class="tag" style="background:${cc}20;color:${cc}">${esc(c.cat)}</span>`:''}
+        ${(c.tags||[]).map(t=>`<span class="tag" style="background:#f0f0f0;color:#555">${esc(t)}</span>`).join('')}
+      </div>
+      ${c.url?`<div style="margin-bottom:12px"><a href="${esc(c.url)}" target="_blank" rel="noopener"
+        style="font-size:11px;color:var(--purple);display:flex;align-items:center;gap:4px">
+        <i class="ti ti-external-link"></i>開啟原始連結</a></div>`:''}
+
+      <!-- SRS 複習：標記已讀懂 / 還不熟，自動決定下次複習時間 -->
+      <div class="review-reset-row" style="flex-direction:column;align-items:stretch;gap:9px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-clock" style="font-size:14px"></i>
+          <span style="flex:1">${due?'<strong style="color:#c00">已到複習時間</strong>':reviewLabel(c)}</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="markReview('${c.id}','again')"><i class="ti ti-refresh" style="font-size:13px"></i>還不熟</button>
+          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="markReview('${c.id}','good')"><i class="ti ti-check" style="font-size:13px"></i>已讀懂</button>
+        </div>
+      </div>
+
+      ${c.points?.length?`<div class="notes-section">
+        <div class="notes-label"><i class="ti ti-notes"></i>重點筆記</div>
+        <ul class="points-view">${c.points.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>
+      </div>`:''}
+      ${c.summary?`<div style="margin-bottom:13px">
+        <div class="form-label" style="margin-bottom:5px">摘要</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6">${esc(c.summary)}</div>
+      </div>`:''}
+      <div class="form-group">
+        <label class="form-label">我的筆記</label>
+        <textarea class="inp" id="notes-ta" placeholder="記錄想法...">${esc(c.notes||'')}</textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" style="font-size:11px" onclick="openEditModal('${c.id}');"><i class="ti ti-pencil" style="font-size:12px;vertical-align:-1px"></i> 編輯內容</button>
+      <div class="modal-footer-right">
+        <button class="btn-ghost" style="font-size:11px" onclick="openCardNote('${c.id}')" title="在學習筆記中開啟"><i class="ti ti-notebook" style="font-size:12px;vertical-align:-1px"></i> 學習筆記</button>
+        <button class="btn-ghost" onclick="closeModal()">關閉</button>
+        <button class="btn-primary" onclick="saveCardNotes('${c.id}')">儲存筆記</button>
+      </div>
+    </div>`;
+  document.getElementById('modal').style.display='flex';
+  renderSidebar(); // 更新老化提醒計數
+}
+
+// ══════════════════════════════
+//  SRS 複習演算法
+// ══════════════════════════════
+function applySrs(c, result){
+  if(result==='again'){
+    c.srsLevel = 0;
+  } else {
+    c.srsLevel = Math.min((typeof c.srsLevel==='number'?c.srsLevel:-1)+1, SRS_INTERVALS.length-1);
+  }
+  c.nextReview = Date.now() + SRS_INTERVALS[c.srsLevel]*86400000;
+  c.lastReviewedAt = Date.now();
+}
+
+function markReview(id, result){
+  const c=state.cards.find(x=>x.id===id); if(!c) return;
+  applySrs(c, result);
+  save();
+  closeModal();
+  toast(result==='good'
+    ? `✅ 已讀懂！${SRS_INTERVALS[c.srsLevel]} 天後再複習`
+    : `📖 已記下，${SRS_INTERVALS[c.srsLevel]} 天後再複習`);
+}
+
+function saveCardNotes(id){
+  const c=state.cards.find(x=>x.id===id);
+  if(c){c.notes=document.getElementById('notes-ta').value;save();}
+  closeModal(); toast('✅ 筆記已儲存！');
+}
+
+function openCardNote(cardId){
+  // find or create a note linked to this card
+  closeModal();
+  let n=notes.find(x=>(x.linkedCards||[]).includes(cardId));
+  if(!n){
+    const c=state.cards.find(x=>x.id===cardId);
+    n={id:uid(),title:(c?c.title+' — ':'')+'學習筆記',content:'',tags:[],linkedCards:[cardId],createdAt:Date.now(),updatedAt:Date.now()};
+    notes.unshift(n); saveNotes();
+  }
+  activeNoteId=n.id;
+  state.view='notes'; state.showDue=false; state.showStale=false; state.activeCat=null;
+  render();
+}
+
+function deleteCard(id){
+  if(!confirm('確定要刪除？')) return;
+  state.cards=state.cards.filter(c=>c.id!==id);
+  state.selected.delete(id);
+  save(); render();
+}
+
+function closeModal(){
+  document.getElementById('modal').style.display='none';
+  editPoints=[''];
+  renderSidebar(); renderGrid(); renderProgress(); renderDueStrip();
+}
+
+// ══════════════════════════════
+//  卡片內測驗模式
+// ══════════════════════════════
+let quiz = {queue:[], idx:0, revealed:false, stats:{good:0, again:0}};
+
+function startQuiz(list){
+  if(!list || !list.length){ toast('目前沒有可測驗的內容'); return; }
+  quiz = {queue:[...list], idx:0, revealed:false, stats:{good:0, again:0}};
+  document.getElementById('quiz-overlay').style.display='flex';
+  renderQuizCard();
+}
+
+function renderQuizCard(){
+  if(quiz.idx>=quiz.queue.length){ renderQuizDone(); return; }
+  const c=quiz.queue[quiz.idx];
+  const m=TYPE_META[c.type]||TYPE_META.article;
+  const cc=catColor(c.cat);
+  document.getElementById('quiz-inner').innerHTML=`
+    <div class="quiz-top">
+      <span class="quiz-progress">${quiz.idx+1} / ${quiz.queue.length}</span>
+      <button class="icon-btn" onclick="closeQuiz()"><i class="ti ti-x" style="font-size:16px"></i></button>
+    </div>
+    <div class="quiz-card-body">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">
+        <span class="tag" style="background:${cc}20;color:${cc}"><i class="ti ${m.icon}" style="font-size:9px;vertical-align:-1px"></i> ${m.label}</span>
+        ${c.cat?`<span class="tag" style="background:${cc}20;color:${cc}">${esc(c.cat)}</span>`:''}
+      </div>
+      <div class="quiz-question">${esc(c.title)}</div>
+      ${!quiz.revealed?`
+        <div class="quiz-hint">回想一下這個內容的重點，再翻開答案...</div>
+        <button class="btn-primary" style="margin:20px auto 0;display:block;padding:9px 22px" onclick="quizReveal()">顯示答案</button>
+      `:`
+        <div class="quiz-answer">
+          ${c.points&&c.points.length?`<ul class="points-view">${c.points.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`:''}
+          ${c.summary?`<div class="quiz-summary">${esc(c.summary)}</div>`:''}
+          ${(!c.points||!c.points.length) && !c.summary?'<div style="color:var(--text3);font-size:12px">（這個內容沒有筆記）</div>':''}
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-ghost" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="quizAnswer('again')"><i class="ti ti-refresh"></i>還不熟</button>
+          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px" onclick="quizAnswer('good')"><i class="ti ti-check"></i>已讀懂</button>
+        </div>
+      `}
+    </div>`;
+}
+
+function renderQuizDone(){
+  const {good, again} = quiz.stats;
+  document.getElementById('quiz-inner').innerHTML=`
+    <div class="quiz-top"><span class="quiz-progress">完成</span>
+      <button class="icon-btn" onclick="closeQuiz()"><i class="ti ti-x" style="font-size:16px"></i></button></div>
+    <div class="quiz-card-body" style="text-align:center">
+      <div style="font-size:38px;margin-bottom:10px">🎉</div>
+      <div class="quiz-question" style="margin-bottom:14px">測驗完成！</div>
+      <div style="display:flex;justify-content:center;gap:28px;margin-bottom:22px">
+        <div><div style="font-size:20px;font-weight:600;color:var(--purple)">${good}</div><div style="font-size:11px;color:var(--text2)">已讀懂</div></div>
+        <div><div style="font-size:20px;font-weight:600;color:#c00">${again}</div><div style="font-size:11px;color:var(--text2)">還不熟</div></div>
+      </div>
+      <button class="btn-primary" style="padding:9px 24px" onclick="closeQuiz()">完成</button>
+    </div>`;
+}
+
+function quizReveal(){ quiz.revealed=true; renderQuizCard(); }
+
+function quizAnswer(result){
+  const c=quiz.queue[quiz.idx];
+  applySrs(c, result);
+  quiz.stats[result]++;
+  save();
+  quiz.idx++; quiz.revealed=false;
+  renderQuizCard();
+}
+
+function closeQuiz(){
+  document.getElementById('quiz-overlay').style.display='none';
+  renderSidebar(); renderGrid(); renderProgress(); renderDueStrip();
+}
+
+// ══════════════════════════════
+//  鍵盤快捷鍵
+// ══════════════════════════════
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('quiz-overlay').style.display==='flex'){ closeQuiz(); return; }
+    if(document.getElementById('modal').style.display==='flex'){ closeModal(); return; }
+    if(state.selectMode){ toggleSelectMode(); return; }
+    return;
+  }
+  const modalOpen = document.getElementById('modal').style.display==='flex' || document.getElementById('quiz-overlay').style.display==='flex';
+  if(modalOpen) return;
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input' || tag==='textarea' || tag==='select') return;
+  if(e.key==='n' || e.key==='N'){ e.preventDefault(); openAddModal(); }
+  else if(e.key==='/'){ e.preventDefault(); document.getElementById('search-input').focus(); }
+});
+
+// ══════════════════════════════
+//  書籤參數自動開 modal
+// ══════════════════════════════
+function checkBookmarkletParams(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('bk_url')) openAddModal();
+}
+
+// ══════════════════════════════
+//  啟動
+// ══════════════════════════════
+//  Notes Engine
+// ══════════════════════════════
+let notes = [];          // [{id,title,content,tags,linkedCards,createdAt,updatedAt}]
+let activeNoteId = null;
+let noteSearchQ = '';
+let noteFilterTag = 'all'; // 'all' | tag string
+
+// note global tag library [{id,label,color}]
+let noteTagLib = [];
+const NOTE_TAG_DEFAULTS=[
+  {id:'ntag_study',  label:'學習',   color:'#7c3aed'},
+  {id:'ntag_idea',   label:'靈感',   color:'#db6b1b'},
+  {id:'ntag_review', label:'待複習', color:'#1e7fd4'},
+  {id:'ntag_done',   label:'已完成', color:'#2a5810'},
+];
+
+function loadNotes(){
+  try{ notes=JSON.parse(localStorage.getItem('lv_notes')||'[]'); }catch(e){notes=[];}
+  try{ noteTagLib=JSON.parse(localStorage.getItem('lv_note_tags')||'[]'); }catch(e){noteTagLib=[];}
+  if(!noteTagLib.length) noteTagLib=NOTE_TAG_DEFAULTS.map(t=>({...t}));
+}
+function saveNotes(){
+  localStorage.setItem('lv_notes',JSON.stringify(notes));
+  localStorage.setItem('lv_note_tags',JSON.stringify(noteTagLib));
+}
+
+function selectNotes(){
+  state.view='notes'; state.showDue=false; state.showStale=false; state.activeCat=null;
+  state.selected.clear(); render();
+}
+
+function newNote(){
+  const n={id:uid(),title:'未命名筆記',content:'',tags:[],linkedCards:[],createdAt:Date.now(),updatedAt:Date.now()};
+  notes.unshift(n); saveNotes(); activeNoteId=n.id; renderNotesPage();
+  setTimeout(()=>{ document.getElementById('note-title-inp')?.focus(); },50);
+}
+
+function deleteNote(id){
+  if(!confirm('確定刪除這篇筆記？')) return;
+  notes=notes.filter(n=>n.id!==id);
+  if(activeNoteId===id) activeNoteId=notes[0]?.id||null;
+  saveNotes(); renderNotesPage();
+}
+
+function getActiveNote(){ return notes.find(n=>n.id===activeNoteId)||null; }
+
+function flushNoteContent(){
+  const n=getActiveNote(); if(!n) return;
+  const titleEl=document.getElementById('note-title-inp');
+  const editorEl=document.getElementById('note-editor');
+  if(titleEl) n.title=titleEl.value||'未命名筆記';
+  if(editorEl) n.content=editorEl.innerHTML;
+  n.updatedAt=Date.now();
+  saveNotes();
+}
+
+function renderNotesPage(){
+  const el=document.getElementById('notes-page'); if(!el) return;
+
+  // filter by search + active tag
+  let filtered=notes;
+  if(noteSearchQ) filtered=filtered.filter(n=>n.title.toLowerCase().includes(noteSearchQ.toLowerCase())||(n.content||'').toLowerCase().includes(noteSearchQ.toLowerCase()));
+  if(noteFilterTag!=='all') filtered=filtered.filter(n=>(n.tags||[]).includes(noteFilterTag));
+
+  const activeNote=getActiveNote();
+
+  // tag filter strip
+  const tagFilterHTML=`<div class="note-tag-filter">
+    <span class="note-tag-filter-chip${noteFilterTag==='all'?' active':''}" style="${noteFilterTag==='all'?'background:var(--purple);':''}background-color:${noteFilterTag==='all'?'var(--purple)':''}" onclick="noteFilterTag='all';renderNotesPage()">全部</span>
+    ${noteTagLib.map(t=>`<span class="note-tag-filter-chip${noteFilterTag===t.label?' active':''}" style="${noteFilterTag===t.label?`background:${t.color};border-color:${t.color};`:''}" onclick="noteFilterTag=noteFilterTag==='${t.label}'?'all':'${t.label}';renderNotesPage()">${esc(t.label)}</span>`).join('')}
+    <span class="note-tag-filter-chip manage" onclick="openNoteTagManager()">⚙ 管理標籤</span>
+  </div>`;
+
+  const listHTML=filtered.map(n=>{
+    const tagDots=(n.tags||[]).map(tag=>{
+      const tdef=noteTagLib.find(x=>x.label===tag);
+      return `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${tdef?tdef.color:'var(--purple)'};margin-right:2px;" title="${esc(tag)}"></span>`;
+    }).join('');
+    return `<div class="note-list-item${n.id===activeNoteId?' active':''}" onclick="selectNote('${n.id}')">
+      <div style="display:flex;align-items:flex-start;gap:4px;">
+        <div style="flex:1;min-width:0;">
+          <div class="note-list-title">${esc(n.title||'未命名筆記')}</div>
+          <div class="note-list-preview">${esc(stripHtml(n.content||'').slice(0,50)||'（尚無內容）')}</div>
+          <div class="note-list-meta"><span>${fmtRelTime(n.updatedAt)}</span>${tagDots}</div>
+        </div>
+        <button class="note-del-btn" onclick="event.stopPropagation();deleteNote('${n.id}')" title="刪除">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="notes-layout">
+    <div class="notes-sidebar">
+      <div class="notes-sidebar-head">
+        <h4>筆記（${notes.length}）</h4>
+        <button onclick="newNote()" class="btn-primary" style="font-size:11px;padding:4px 10px;"><i class="ti ti-plus" style="font-size:11px"></i>新增</button>
+      </div>
+      <div style="padding:6px 8px;border-bottom:1px solid var(--border);">
+        <input style="width:100%;font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;outline:none;background:#fff;" placeholder="搜尋筆記…" value="${esc(noteSearchQ)}" oninput="noteSearchQ=this.value;renderNotesPage()"/>
+      </div>
+      ${tagFilterHTML}
+      <div class="notes-list">${listHTML||`<div style="font-size:12px;color:var(--text3);padding:16px;text-align:center;">${noteFilterTag!=='all'?'這個標籤下沒有筆記':'還沒有筆記<br>點上方「新增」開始'}</div>`}</div>
+    </div>
+    <div class="notes-editor-wrap" id="notes-editor-wrap">
+      ${activeNote ? noteEditorHTML(activeNote) : `<div class="notes-editor-empty"><i class="ti ti-notebook"></i><p>選擇左側筆記或新增一篇</p></div>`}
+    </div>
+  </div>`;
+
+  if(activeNote){
+    const editorEl=document.getElementById('note-editor');
+    if(editorEl && !editorEl._bound){
+      editorEl._bound=true;
+      editorEl.addEventListener('input',debounceFlush);
+      editorEl.addEventListener('keydown', handleEditorKeydown);
+    }
+    updateToolbarState();
+    document.addEventListener('selectionchange', updateToolbarState);
+  }
+}
+
+function selectNote(id){ flushNoteContent(); activeNoteId=id; renderNotesPage(); }
+
+function stripHtml(html){ const d=document.createElement('div');d.innerHTML=html;return d.textContent||''; }
+function fmtRelTime(ts){
+  if(!ts) return '';
+  const diff=Date.now()-ts;
+  if(diff<60000) return '剛剛';
+  if(diff<3600000) return Math.floor(diff/60000)+'分鐘前';
+  if(diff<86400000) return Math.floor(diff/3600000)+'小時前';
+  return Math.floor(diff/86400000)+'天前';
+}
+let _flushTimer=null;
+function debounceFlush(){ clearTimeout(_flushTimer); _flushTimer=setTimeout(flushNoteContent,600); }
+
+function noteEditorHTML(n){
+  const tagChips=(n.tags||[]).map(tag=>{
+    const tdef=noteTagLib.find(x=>x.label===tag);
+    const col=tdef?tdef.color:'var(--purple)';
+    return `<span class="note-tag-chip" style="background:${col}22;color:${col};border:1px solid ${col}44;">${esc(tag)}<span class="rm" onclick="removeNoteTag('${n.id}','${esc(tag)}')">×</span></span>`;
+  }).join('');
+  const linkedCardsHTML=(n.linkedCards||[]).map(cid=>{
+    const c=state.cards.find(x=>x.id===cid);
+    if(!c) return '';
+    const m=TYPE_META[c.type]||TYPE_META.article;
+    return `<span style="font-size:10px;background:var(--purple-light);color:var(--purple);border-radius:4px;padding:1px 7px;display:inline-flex;align-items:center;gap:3px;cursor:pointer;" onclick="openViewModal('${cid}')" title="${esc(c.title)}">
+      ${m.emoji} ${esc(c.title.slice(0,20))}
+      <span onclick="event.stopPropagation();unlinkCard('${n.id}','${cid}')" style="opacity:.6;margin-left:2px;">×</span>
+    </span>`;
+  }).join('');
+
+  return `
+    <div class="note-editor-head">
+      <input class="note-title-inp" id="note-title-inp" value="${esc(n.title||'')}" placeholder="筆記標題…"
+        oninput="debounceFlush()" onblur="flushNoteContent();renderNotesList()"/>
+      <button onclick="openLinkCardPicker('${n.id}')" style="font-size:11px;padding:4px 9px;background:var(--purple-light);color:var(--purple);border:1px solid #AFA9EC;border-radius:6px;cursor:pointer;font-family:inherit;" title="引用書籤">🔗 引用書籤</button>
+      <button onclick="exportNoteAsHTML('${n.id}')" style="font-size:11px;padding:4px 9px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;" title="匯出筆記">⬇ 匯出</button>
+    </div>
+    <div class="note-meta-bar">
+      <span>${new Date(n.createdAt).toLocaleDateString('zh-TW')} 建立</span>
+      <span>·</span>
+      <span>${fmtRelTime(n.updatedAt)} 更新</span>
+      ${tagChips}
+      <button class="note-add-tag-btn" onclick="promptAddNoteTag('${n.id}')">+ 標籤</button>
+      ${linkedCardsHTML?`<span style="color:var(--text3)">·</span>${linkedCardsHTML}`:''}
+    </div>
+    <div class="editor-toolbar" id="editor-toolbar">
+      <select class="tb-select" onchange="execCmd('formatBlock',this.value);this.value='p'" title="段落格式">
+        <option value="p">段落</option>
+        <option value="h1">標題 1</option>
+        <option value="h2">標題 2</option>
+        <option value="h3">標題 3</option>
+        <option value="pre">程式碼塊</option>
+      </select>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="tb-bold" onclick="execCmd('bold')" title="粗體"><i class="ti ti-bold"></i></button>
+      <button class="tb-btn" id="tb-italic" onclick="execCmd('italic')" title="斜體"><i class="ti ti-italic"></i></button>
+      <button class="tb-btn" id="tb-underline" onclick="execCmd('underline')" title="底線"><i class="ti ti-underline"></i></button>
+      <button class="tb-btn" id="tb-strike" onclick="execCmd('strikeThrough')" title="刪除線"><i class="ti ti-strikethrough"></i></button>
+      <button class="tb-btn" onclick="execCmd('hiliteColor','#fff3b0')" title="螢光標記">🖊</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="tb-ul" onclick="execCmd('insertUnorderedList')" title="項目清單"><i class="ti ti-list"></i></button>
+      <button class="tb-btn" id="tb-ol" onclick="execCmd('insertOrderedList')" title="數字清單"><i class="ti ti-list-numbers"></i></button>
+      <button class="tb-btn" onclick="execCmd('formatBlock','blockquote')" title="引用"><i class="ti ti-quote"></i></button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="insertLink()" title="插入連結"><i class="ti ti-link"></i></button>
+      <button class="tb-btn" onclick="insertImage()" title="插入圖片"><i class="ti ti-photo"></i></button>
+      <button class="tb-btn" onclick="insertHR()" title="分隔線"><i class="ti ti-minus"></i></button>
+      <button class="tb-btn" onclick="insertCode()" title="行內程式碼"><i class="ti ti-code"></i></button>
+      <div class="tb-sep"></div>
+      <input type="color" title="文字顏色" style="width:26px;height:26px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:1px;" onchange="execCmd('foreColor',this.value)"/>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="execCmd('undo')" title="復原"><i class="ti ti-arrow-back-up"></i></button>
+      <button class="tb-btn" onclick="execCmd('redo')" title="重做"><i class="ti ti-arrow-forward-up"></i></button>
+    </div>
+    <div class="note-content-area">
+      <div class="note-editor" id="note-editor" contenteditable="true" spellcheck="false">${n.content||''}</div>
+    </div>`;
+}
+
+function renderNotesList(){
+  const listEl=document.querySelector('.notes-list'); if(!listEl) return;
+  let filtered=notes;
+  if(noteSearchQ) filtered=filtered.filter(n=>n.title.toLowerCase().includes(noteSearchQ.toLowerCase())||(n.content||'').toLowerCase().includes(noteSearchQ.toLowerCase()));
+  if(noteFilterTag!=='all') filtered=filtered.filter(n=>(n.tags||[]).includes(noteFilterTag));
+  listEl.innerHTML=filtered.map(n=>{
+    const tagDots=(n.tags||[]).map(tag=>{
+      const tdef=noteTagLib.find(x=>x.label===tag);
+      return `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${tdef?tdef.color:'var(--purple)'};margin-right:2px;" title="${esc(tag)}"></span>`;
+    }).join('');
+    return `<div class="note-list-item${n.id===activeNoteId?' active':''}" onclick="selectNote('${n.id}')">
+      <div style="display:flex;align-items:flex-start;gap:4px;">
+        <div style="flex:1;min-width:0;">
+          <div class="note-list-title">${esc(n.title||'未命名筆記')}</div>
+          <div class="note-list-preview">${esc(stripHtml(n.content||'').slice(0,50)||'（尚無內容）')}</div>
+          <div class="note-list-meta"><span>${fmtRelTime(n.updatedAt)}</span>${tagDots}</div>
+        </div>
+        <button class="note-del-btn" onclick="event.stopPropagation();deleteNote('${n.id}')" title="刪除">🗑</button>
+      </div>
+    </div>`;
+  }).join('')||`<div style="font-size:12px;color:var(--text3);padding:16px;text-align:center;">${noteFilterTag!=='all'?'這個標籤下沒有筆記':'還沒有筆記'}</div>`;
+}
+
+// ── Editor commands ───────────────────────────────
+function execCmd(cmd, val){
+  document.getElementById('note-editor')?.focus();
+  document.execCommand(cmd, false, val||null);
+  updateToolbarState(); debounceFlush();
+}
+function updateToolbarState(){
+  try{
+    ['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList'].forEach(cmd=>{
+      const map={bold:'tb-bold',italic:'tb-italic',underline:'tb-underline',strikeThrough:'tb-strike',insertUnorderedList:'tb-ul',insertOrderedList:'tb-ol'};
+      const el=document.getElementById(map[cmd]); if(el) el.classList.toggle('active',document.queryCommandState(cmd));
+    });
+  }catch(e){}
+}
+function insertLink(){
+  const url=prompt('輸入連結網址：'); if(!url) return;
+  const text=prompt('連結顯示文字：')||url;
+  execCmd('insertHTML',`<a href="${esc(url)}" target="_blank">${esc(text)}</a>`);
+}
+function insertImage(){
+  const url=prompt('輸入圖片網址：'); if(!url) return;
+  execCmd('insertHTML',`<img src="${esc(url)}" style="max-width:100%;border-radius:8px;margin:6px 0;"/>`);
+}
+function insertHR(){ execCmd('insertHTML','<hr/>'); }
+function insertCode(){
+  const sel=window.getSelection();
+  const text=sel&&sel.toString()?sel.toString():'';
+  execCmd('insertHTML',`<code>${esc(text)||'code'}</code>`);
+}
+function handleEditorKeydown(e){
+  // Tab → indent
+  if(e.key==='Tab'){ e.preventDefault(); execCmd('insertHTML','&nbsp;&nbsp;&nbsp;&nbsp;'); }
+}
+
+// ── Note tags ─────────────────────────────────────
+function promptAddNoteTag(id){
+  flushNoteContent();
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  n.tags=n.tags||[];
+  // Build a quick picker popover in the modal system
+  const modalEl=document.getElementById('modal-inner');
+  modalEl.innerHTML=`
+    <div class="modal-header"><h3>新增標籤</h3>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">點擊標籤加入這篇筆記，或在下方新增自訂標籤。</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+        ${noteTagLib.map(t=>{
+          const has=n.tags.includes(t.label);
+          return `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:99px;cursor:pointer;font-size:12px;border:1.5px solid ${t.color};background:${has?t.color+'dd':'#fff'};color:${has?'#fff':t.color};"
+            onclick="toggleNoteTag('${id}','${t.label}',this,'${t.color}')">
+            ${has?'✓ ':''} ${esc(t.label)}
+          </span>`;
+        }).join('')}
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600;">新增自訂標籤到筆記</div>
+        <div style="display:flex;gap:6px;">
+          <input id="custom-tag-inp" class="inp" style="flex:1;font-size:12px;" placeholder="標籤名稱…"/>
+          <button class="btn-primary" style="font-size:12px;" onclick="addCustomNoteTag('${id}')">新增</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><div></div>
+      <div class="modal-footer-right"><button class="btn-primary" onclick="closeModal();renderNotesPage()">完成</button></div>
+    </div>`;
+  document.getElementById('modal').style.display='flex';
+}
+
+function toggleNoteTag(noteId, label, el, color){
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  n.tags=n.tags||[];
+  if(n.tags.includes(label)){
+    n.tags=n.tags.filter(t=>t!==label);
+    el.style.background='#fff'; el.style.color=color; el.innerHTML=esc(label);
+  } else {
+    n.tags.push(label);
+    el.style.background=color+'dd'; el.style.color='#fff'; el.innerHTML='✓ '+esc(label);
+  }
+  n.updatedAt=Date.now(); saveNotes();
+}
+
+function addCustomNoteTag(noteId){
+  const inp=document.getElementById('custom-tag-inp');
+  const label=(inp?.value||'').trim(); if(!label){inp?.focus();return;}
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  n.tags=n.tags||[];
+  if(!n.tags.includes(label)) n.tags.push(label);
+  n.updatedAt=Date.now(); saveNotes();
+  inp.value='';
+  toast('✅ 標籤已新增：'+label);
+}
+function openNoteTagManager(){
+  const modalEl=document.getElementById('modal-inner');
+  const renderManagerBody=()=>`
+    <div class="modal-header"><h3>管理筆記標籤</h3>
+      <button class="icon-btn" onclick="closeModal();renderNotesPage()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+    <div class="modal-body">
+      <div id="ntm-list">
+        ${noteTagLib.map(t=>`<div class="ntm-row">
+          <span class="ntm-swatch" style="background:${t.color}"></span>
+          <span class="ntm-label">${esc(t.label)}</span>
+          ${noteTagLib.length>1?`<button class="ntm-del" onclick="deleteNoteTag('${t.id}')">✕</button>`:''}
+        </div>`).join('')}
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+        <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:6px;">新增標籤</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="ntm-new-label" class="inp" style="flex:1;font-size:12px;" placeholder="標籤名稱"/>
+          <input type="color" id="ntm-new-color" value="#7c3aed" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;"/>
+          <button class="btn-primary" style="font-size:12px;" onclick="addNoteTagToLib()">新增</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><div></div>
+      <div class="modal-footer-right"><button class="btn-primary" onclick="closeModal();renderNotesPage()">完成</button></div>
+    </div>`;
+  modalEl.innerHTML=renderManagerBody();
+  document.getElementById('modal').style.display='flex';
+}
+
+function addNoteTagToLib(){
+  const label=(document.getElementById('ntm-new-label')?.value||'').trim();
+  if(!label){document.getElementById('ntm-new-label')?.focus();return;}
+  if(noteTagLib.find(t=>t.label===label)){toast('標籤已存在');return;}
+  const color=document.getElementById('ntm-new-color')?.value||'#7c3aed';
+  noteTagLib.push({id:'ntag_'+uid(),label,color});
+  saveNotes();
+  openNoteTagManager(); // re-render manager
+}
+
+function deleteNoteTag(tid){
+  const t=noteTagLib.find(x=>x.id===tid); if(!t) return;
+  noteTagLib=noteTagLib.filter(x=>x.id!==tid);
+  // remove from all notes
+  notes.forEach(n=>{n.tags=(n.tags||[]).filter(tag=>tag!==t.label);});
+  saveNotes();
+  openNoteTagManager();
+}
+
+function removeNoteTag(id,tag){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  n.tags=(n.tags||[]).filter(t=>t!==tag);
+  n.updatedAt=Date.now(); saveNotes(); renderNotesPage();
+}
+
+// ── Card linking ──────────────────────────────────
+function openLinkCardPicker(noteId){
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  const linked=n.linkedCards||[];
+  const modalEl=document.getElementById('modal-inner');
+  modalEl.innerHTML=`
+    <div class="modal-header"><h3>引用書籤到筆記</h3>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:15px"></i></button></div>
+    <div class="modal-body">
+      <input class="inp" placeholder="搜尋書籤…" oninput="renderCardPickerList('${noteId}',this.value)" id="card-picker-search"/>
+      <div id="card-picker-list" style="margin-top:8px;max-height:320px;overflow-y:auto;"></div>
+    </div>
+    <div class="modal-footer"><div></div><div class="modal-footer-right">
+      <button class="btn-ghost" onclick="closeModal()">完成</button>
+    </div></div>`;
+  document.getElementById('modal').style.display='flex';
+  renderCardPickerList(noteId,'');
+}
+
+function renderCardPickerList(noteId, q){
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  const linked=n.linkedCards||[];
+  const cards=q ? state.cards.filter(c=>c.title.toLowerCase().includes(q.toLowerCase())) : state.cards;
+  const el=document.getElementById('card-picker-list'); if(!el) return;
+  el.innerHTML=cards.slice(0,40).map(c=>{
+    const m=TYPE_META[c.type]||TYPE_META.article;
+    const isLinked=linked.includes(c.id);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;cursor:pointer;${isLinked?'background:var(--purple-light);':''}" onclick="toggleCardLink('${noteId}','${c.id}')">
+      <span style="font-size:16px;">${m.emoji}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.title)}</div>
+        <div style="font-size:10px;color:var(--text3);">${m.label}${c.cat?' · '+esc(c.cat):''}</div>
+      </div>
+      <span style="font-size:14px;">${isLinked?'✅':''}</span>
+    </div>`;
+  }).join('')||'<div style="font-size:12px;color:var(--text3);padding:12px;">沒有符合的書籤</div>';
+}
+
+function toggleCardLink(noteId, cardId){
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  n.linkedCards=n.linkedCards||[];
+  if(n.linkedCards.includes(cardId)) n.linkedCards=n.linkedCards.filter(id=>id!==cardId);
+  else n.linkedCards.push(cardId);
+  n.updatedAt=Date.now(); saveNotes();
+  renderCardPickerList(noteId, document.getElementById('card-picker-search')?.value||'');
+  // also insert citation block into editor
+  if(n.linkedCards.includes(cardId)){
+    const c=state.cards.find(x=>x.id===cardId); if(!c) return;
+    const m=TYPE_META[c.type]||TYPE_META.article;
+    const thumbHtml=c.thumbUrl?`<img src="${esc(c.thumbUrl)}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'"/>`:m.emoji;
+    const html=`<div class="note-card-cite" onclick="if(window.openViewModal)openViewModal('${c.id}')">
+      <div class="note-card-cite-thumb">${thumbHtml}</div>
+      <div class="note-card-cite-body">
+        <div class="note-card-cite-label">📎 引用書籤</div>
+        <div class="note-card-cite-title">${esc(c.title)}</div>
+        <div class="note-card-cite-url">${esc(c.url||'')}</div>
+      </div>
+    </div>`;
+    const editorEl=document.getElementById('note-editor');
+    if(editorEl){ editorEl.focus(); document.execCommand('insertHTML',false,html); debounceFlush(); }
+  }
+  // re-render meta bar
+  const metaLinked=document.querySelector('.note-meta-bar');
+  if(metaLinked && n){
+    // re-render just the note to refresh meta
+    const wrap=document.getElementById('notes-editor-wrap');
+    if(wrap){ wrap.innerHTML=noteEditorHTML(n);
+      const ed=document.getElementById('note-editor');
+      if(ed){ed.addEventListener('input',debounceFlush);ed.addEventListener('keydown',handleEditorKeydown);}
+    }
+  }
+}
+
+function unlinkCard(noteId, cardId){
+  const n=notes.find(x=>x.id===noteId); if(!n) return;
+  n.linkedCards=(n.linkedCards||[]).filter(id=>id!==cardId);
+  n.updatedAt=Date.now(); saveNotes(); renderNotesPage();
+}
+
+// ── Export note ───────────────────────────────────
+function exportNoteAsHTML(id){
+  flushNoteContent();
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  const html=`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"/><title>${esc(n.title)}</title>
+  <style>body{max-width:720px;margin:40px auto;font-family:sans-serif;font-size:14px;line-height:1.8;color:#1f1e1b}
+  h1{font-size:24px}h2{font-size:19px}h3{font-size:16px}
+  blockquote{border-left:3px solid #7c3aed;padding:4px 12px;background:#f5f3ff;border-radius:0 6px 6px 0}
+  pre{background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:14px;font-family:monospace;font-size:13px}
+  code{background:#f0eeff;color:#7c3aed;border-radius:4px;padding:1px 5px;font-family:monospace}
+  pre code{background:transparent;color:inherit}hr{border:none;border-top:2px solid #eee}
+  img{max-width:100%;border-radius:8px}.meta{font-size:12px;color:#888;margin-bottom:24px}</style></head>
+  <body><h1>${esc(n.title)}</h1><div class="meta">${new Date(n.createdAt).toLocaleDateString('zh-TW')} 建立 · ${new Date(n.updatedAt).toLocaleDateString('zh-TW')} 更新${n.tags?.length?' · '+n.tags.map(t=>'#'+t).join(' '):''}</div>
+  ${n.content||''}</body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(n.title||'note').replace(/[/\\?%*:|"<>]/g,'-')+'.html';
+  a.click();
+}
+
+// ── Card view modal: show attached note ───────────
+// patch openViewModal to add note section at bottom
+const _origOpenViewModal = typeof openViewModal==='function' ? openViewModal : null;
+
+// ══════════════════════════════
+//  Notes Engine END
+// ══════════════════════════════
+loadFromStorage();
+loadNavConfig();
+loadTodoTags();
+loadTodos();
+loadNotes();
+initCalendarState();
+initNewCatColorPicker();
+setupBookmarklet();
+render();
+renderFixedNav();
+updateCounts();
+checkBookmarkletParams();
+</script>
+</body>
+</html>
